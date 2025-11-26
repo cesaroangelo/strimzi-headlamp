@@ -3,6 +3,7 @@ import { Kafka as K8sKafka } from '../crds';
 import { getClusterMode, isKRaftMode, isKafkaReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { SearchFilter, FilterGroup, FilterSelect } from './SearchFilter';
+import { KafkaTopologyModal } from './KafkaTopologyModal';
 
 export function KafkaList() {
   const [kafkas, setKafkas] = React.useState<K8sKafka[]>([]);
@@ -13,6 +14,10 @@ export function KafkaList() {
   const [modeFilter, setModeFilter] = React.useState('all');
   const [statusFilter, setStatusFilter] = React.useState('all');
 
+  // Topology modal state
+  const [selectedKafka, setSelectedKafka] = React.useState<K8sKafka | null>(null);
+  const [isTopologyModalOpen, setIsTopologyModalOpen] = React.useState(false);
+
   React.useEffect(() => {
     // Fetch Kafka resources using Headlamp API
     ApiProxy.request('/apis/kafka.strimzi.io/v1beta2/kafkas')
@@ -22,7 +27,12 @@ export function KafkaList() {
         }
       })
       .catch((err: Error) => {
-        setError(err.message);
+        // Handle case when Strimzi CRD is not installed
+        if (err.message === 'Not Found' || err.message.includes('404')) {
+          setError('Strimzi is not installed in this cluster. Please install the Strimzi operator first.');
+        } else {
+          setError(err.message);
+        }
       });
   }, []);
 
@@ -122,9 +132,30 @@ export function KafkaList() {
               const isKRaft = isKRaftMode(kafka);
               const ready = isKafkaReady(kafka);
 
+              // Check if cluster uses KafkaNodePools (replicas might be undefined)
+              const replicas = kafka.spec?.kafka?.replicas;
+              const replicasDisplay = replicas !== undefined ? replicas : 'KafkaNodePool';
+
               return (
                 <tr key={`${kafka.metadata.namespace}/${kafka.metadata.name}`} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '12px' }}>{kafka.metadata.name}</td>
+                  <td style={{ padding: '12px' }}>
+                    <span
+                      onClick={() => {
+                        setSelectedKafka(kafka);
+                        setIsTopologyModalOpen(true);
+                      }}
+                      style={{
+                        color: '#2563eb',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                      onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                    >
+                      {kafka.metadata.name}
+                    </span>
+                  </td>
                   <td style={{ padding: '12px' }}>{kafka.metadata.namespace}</td>
                   <td style={{ padding: '12px' }}>
                     <span style={{
@@ -138,7 +169,7 @@ export function KafkaList() {
                     </span>
                   </td>
                   <td style={{ padding: '12px' }}>{kafka.spec.kafka.version || 'N/A'}</td>
-                  <td style={{ padding: '12px' }}>{kafka.spec.kafka.replicas}</td>
+                  <td style={{ padding: '12px' }}>{replicasDisplay}</td>
                   <td style={{ padding: '12px' }}>
                     <span style={{
                       padding: '4px 8px',
@@ -156,6 +187,16 @@ export function KafkaList() {
           </tbody>
         </table>
       )}
+
+      {/* Topology Modal */}
+      <KafkaTopologyModal
+        kafka={selectedKafka}
+        open={isTopologyModalOpen}
+        onClose={() => {
+          setIsTopologyModalOpen(false);
+          setSelectedKafka(null);
+        }}
+      />
     </div>
   );
 }
