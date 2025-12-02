@@ -1,23 +1,15 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Angelo Cesaro
+
 import React from 'react';
-import { KafkaTopic } from '../crds';
+import { KafkaTopic, K8sListResponse } from '../crds';
 import { isTopicReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { SearchFilter, FilterGroup, FilterSelect, FilterNumberRange } from './SearchFilter';
-
-// Helper to get theme-aware colors
-const useThemeColors = () => {
-  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  return {
-    background: isDark ? '#1e1e1e' : '#ffffff',
-    text: isDark ? '#e0e0e0' : '#000000',
-    textSecondary: isDark ? '#b0b0b0' : '#666666',
-    border: isDark ? '#404040' : '#ddd',
-    inputBg: isDark ? '#2a2a2a' : '#ffffff',
-    inputBorder: isDark ? '#505050' : '#ddd',
-    overlay: 'rgba(0,0,0,0.5)',
-  };
-};
+import { useThemeColors } from '../utils/theme';
+import { getErrorMessage } from '../utils/errors';
+import { Toast, ToastMessage } from './Toast';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 
 interface TopicFormData {
   name: string;
@@ -32,10 +24,12 @@ interface TopicFormData {
 
 export function KafkaTopicList() {
   const [topics, setTopics] = React.useState<KafkaTopic[]>([]);
-  const [error, setError] = React.useState<string | null>(null);
+  const [toast, setToast] = React.useState<ToastMessage | null>(null);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
   const [showEditDialog, setShowEditDialog] = React.useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [editingTopic, setEditingTopic] = React.useState<KafkaTopic | null>(null);
+  const [deletingTopic, setDeletingTopic] = React.useState<KafkaTopic | null>(null);
   const [formData, setFormData] = React.useState<TopicFormData>({
     name: '',
     namespace: 'kafka',
@@ -56,23 +50,35 @@ export function KafkaTopicList() {
 
   const fetchTopics = React.useCallback(() => {
     ApiProxy.request('/apis/kafka.strimzi.io/v1beta2/kafkatopics')
-      .then((data: any) => {
-        if (data && data.items) {
-          setTopics(data.items);
-        }
+      .then((data: K8sListResponse<KafkaTopic>) => {
+        setTopics(data.items);
       })
-      .catch((err: Error) => {
+      .catch((err: unknown) => {
         // Handle case when Strimzi CRD is not installed
-        if (err.message === 'Not Found' || err.message.includes('404')) {
-          setError('Strimzi is not installed in this cluster. Please install the Strimzi operator first.');
+        const message = getErrorMessage(err);
+        if (message === 'Not Found' || message.includes('404')) {
+          setToast({
+            message: 'Strimzi is not installed in this cluster. Please install the Strimzi operator first.',
+            type: 'error',
+            duration: 6000
+          });
         } else {
-          setError(err.message);
+          setToast({ message, type: 'error' });
         }
       });
   }, []);
 
   React.useEffect(() => {
+    // Initial fetch
     fetchTopics();
+
+    // Auto-refresh every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchTopics();
+    }, 5000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, [fetchTopics]);
 
   // Filter topics based on search and filters
@@ -149,9 +155,10 @@ export function KafkaTopicList() {
         partitions: 3,
         replicas: 3,
       });
+      setToast({ message: `Topic "${formData.name}" created successfully`, type: 'success' });
       fetchTopics();
-    } catch (err: any) {
-      setError(err.message || 'Failed to create topic');
+    } catch (err: unknown) {
+      setToast({ message: getErrorMessage(err) || 'Failed to create topic', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -187,28 +194,42 @@ export function KafkaTopicList() {
 
       setShowEditDialog(false);
       setEditingTopic(null);
+      setToast({ message: `Topic "${editingTopic?.metadata.name}" updated successfully`, type: 'success' });
       fetchTopics();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update topic');
+    } catch (err: unknown) {
+      setToast({ message: getErrorMessage(err) || 'Failed to update topic', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (topic: KafkaTopic) => {
-    if (!window.confirm(`Are you sure you want to delete topic "${topic.metadata.name}"?`)) {
-      return;
-    }
+  const openDeleteDialog = (topic: KafkaTopic) => {
+    setDeletingTopic(topic);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingTopic) return;
+
+    setShowDeleteDialog(false);
 
     try {
       await ApiProxy.request(
-        `/apis/kafka.strimzi.io/v1beta2/namespaces/${topic.metadata.namespace}/kafkatopics/${topic.metadata.name}`,
+        `/apis/kafka.strimzi.io/v1beta2/namespaces/${deletingTopic.metadata.namespace}/kafkatopics/${deletingTopic.metadata.name}`,
         { method: 'DELETE' }
       );
+      setToast({ message: `Topic "${deletingTopic.metadata.name}" deleted successfully`, type: 'success' });
       fetchTopics();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete topic');
+    } catch (err: unknown) {
+      setToast({ message: getErrorMessage(err) || 'Failed to delete topic', type: 'error' });
+    } finally {
+      setDeletingTopic(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+    setDeletingTopic(null);
   };
 
   const openEditDialog = (topic: KafkaTopic) => {
@@ -225,10 +246,6 @@ export function KafkaTopicList() {
     });
     setShowEditDialog(true);
   };
-
-  if (error) {
-    return <div style={{ padding: '20px', color: 'red' }}>Error: {error}</div>;
-  }
 
   const renderDialog = (isEdit: boolean) => {
     if ((!showCreateDialog && !isEdit) || (!showEditDialog && isEdit)) return null;
@@ -517,7 +534,7 @@ export function KafkaTopicList() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(topic)}
+                      onClick={() => openDeleteDialog(topic)}
                       style={{
                         padding: '6px 12px',
                         backgroundColor: '#f44336',
@@ -540,6 +557,30 @@ export function KafkaTopicList() {
 
       {renderDialog(false)}
       {renderDialog(true)}
+
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={showDeleteDialog}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Topic</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete topic <strong>{deletingTopic?.metadata.name}</strong>?
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }

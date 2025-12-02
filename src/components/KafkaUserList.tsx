@@ -1,23 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Angelo Cesaro
+
 import React from 'react';
-import { KafkaUser } from '../crds';
+import { KafkaUser, K8sListResponse } from '../crds';
 import { isUserReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { SearchFilter, FilterGroup, FilterSelect } from './SearchFilter';
-
-// Helper to get theme-aware colors
-const useThemeColors = () => {
-  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  return {
-    background: isDark ? '#1e1e1e' : '#ffffff',
-    text: isDark ? '#e0e0e0' : '#000000',
-    textSecondary: isDark ? '#b0b0b0' : '#666666',
-    border: isDark ? '#404040' : '#ddd',
-    inputBg: isDark ? '#2a2a2a' : '#ffffff',
-    inputBorder: isDark ? '#505050' : '#ddd',
-    overlay: 'rgba(0,0,0,0.5)',
-  };
-};
+import { useThemeColors } from '../utils/theme';
+import { getErrorMessage } from '../utils/errors';
+import { SecureSecretDisplay } from './SecureSecretDisplay';
+import { Toast, ToastMessage } from './Toast';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 
 interface ACL {
   resource: {
@@ -40,10 +33,12 @@ interface UserFormData {
 
 export function KafkaUserList() {
   const [users, setUsers] = React.useState<KafkaUser[]>([]);
-  const [error, setError] = React.useState<string | null>(null);
+  const [toast, setToast] = React.useState<ToastMessage | null>(null);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [showSecretDialog, setShowSecretDialog] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<KafkaUser | null>(null);
+  const [deletingUser, setDeletingUser] = React.useState<KafkaUser | null>(null);
   const [userSecret, setUserSecret] = React.useState<string>('');
   const [formData, setFormData] = React.useState<UserFormData>({
     name: '',
@@ -64,23 +59,35 @@ export function KafkaUserList() {
 
   const fetchUsers = React.useCallback(() => {
     ApiProxy.request('/apis/kafka.strimzi.io/v1beta2/kafkausers')
-      .then((data: any) => {
-        if (data && data.items) {
-          setUsers(data.items);
-        }
+      .then((data: K8sListResponse<KafkaUser>) => {
+        setUsers(data.items);
       })
-      .catch((err: Error) => {
+      .catch((err: unknown) => {
         // Handle case when Strimzi CRD is not installed
-        if (err.message === 'Not Found' || err.message.includes('404')) {
-          setError('Strimzi is not installed in this cluster. Please install the Strimzi operator first.');
+        const message = getErrorMessage(err);
+        if (message === 'Not Found' || message.includes('404')) {
+          setToast({
+            message: 'Strimzi is not installed in this cluster. Please install the Strimzi operator first.',
+            type: 'error',
+            duration: 6000
+          });
         } else {
-          setError(err.message);
+          setToast({ message, type: 'error' });
         }
       });
   }, []);
 
   React.useEffect(() => {
+    // Initial fetch
     fetchUsers();
+
+    // Auto-refresh every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchUsers();
+    }, 5000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, [fetchUsers]);
 
   // Filter users based on search and filters
@@ -142,8 +149,8 @@ export function KafkaUserList() {
 
       setSelectedUser(user);
       setShowSecretDialog(true);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch user secret');
+    } catch (err: unknown) {
+      setToast({ message: getErrorMessage(err) || 'Failed to fetch user secret', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -152,7 +159,7 @@ export function KafkaUserList() {
   const handleCreate = async () => {
     setLoading(true);
     try {
-      const userResource: any = {
+      const userResource: KafkaUser = {
         apiVersion: 'kafka.strimzi.io/v1beta2',
         kind: 'KafkaUser',
         metadata: {
@@ -186,6 +193,7 @@ export function KafkaUserList() {
       );
 
       setShowCreateDialog(false);
+      const userName = formData.name;
       setFormData({
         name: '',
         namespace: 'kafka',
@@ -194,28 +202,42 @@ export function KafkaUserList() {
         authorizationType: 'simple',
         acls: [],
       });
+      setToast({ message: `User "${userName}" created successfully`, type: 'success' });
       fetchUsers();
-    } catch (err: any) {
-      setError(err.message || 'Failed to create user');
+    } catch (err: unknown) {
+      setToast({ message: getErrorMessage(err) || 'Failed to create user', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (user: KafkaUser) => {
-    if (!window.confirm(`Are you sure you want to delete user "${user.metadata.name}"?`)) {
-      return;
-    }
+  const openDeleteDialog = (user: KafkaUser) => {
+    setDeletingUser(user);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingUser) return;
+
+    setShowDeleteDialog(false);
 
     try {
       await ApiProxy.request(
-        `/apis/kafka.strimzi.io/v1beta2/namespaces/${user.metadata.namespace}/kafkausers/${user.metadata.name}`,
+        `/apis/kafka.strimzi.io/v1beta2/namespaces/${deletingUser.metadata.namespace}/kafkausers/${deletingUser.metadata.name}`,
         { method: 'DELETE' }
       );
+      setToast({ message: `User "${deletingUser.metadata.name}" deleted successfully`, type: 'success' });
       fetchUsers();
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete user');
+    } catch (err: unknown) {
+      setToast({ message: getErrorMessage(err) || 'Failed to delete user', type: 'error' });
+    } finally {
+      setDeletingUser(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+    setDeletingUser(null);
   };
 
   const addACL = () => {
@@ -243,7 +265,7 @@ export function KafkaUserList() {
     });
   };
 
-  const updateACL = (index: number, field: string, value: any) => {
+  const updateACL = (index: number, field: string, value: string | string[]) => {
     const newACLs = [...formData.acls];
     if (field.startsWith('resource.')) {
       const resourceField = field.split('.')[1];
@@ -257,7 +279,7 @@ export function KafkaUserList() {
     } else if (field === 'operations') {
       newACLs[index] = {
         ...newACLs[index],
-        operations: value,
+        operations: value as string[],
       };
     } else {
       newACLs[index] = {
@@ -268,88 +290,10 @@ export function KafkaUserList() {
     setFormData({ ...formData, acls: newACLs });
   };
 
-  if (error) {
-    return (
-      <div style={{ padding: '20px' }}>
-        <div style={{ color: 'red', marginBottom: '16px' }}>Error: {error}</div>
-        <button onClick={() => setError(null)} style={{ padding: '8px 16px', cursor: 'pointer' }}>
-          Dismiss
-        </button>
-      </div>
-    );
-  }
-
-  const renderSecretDialog = () => {
-    if (!showSecretDialog || !selectedUser) return null;
-
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: colors.overlay,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}>
-        <div style={{
-          backgroundColor: colors.background,
-          color: colors.text,
-          padding: '24px',
-          borderRadius: '8px',
-          minWidth: '600px',
-          maxHeight: '80vh',
-          overflow: 'auto',
-        }}>
-          <h2 style={{ color: colors.text }}>User Credentials: {selectedUser.metadata.name}</h2>
-          <p style={{ color: colors.text }}><strong>Authentication:</strong> {selectedUser.spec.authentication.type}</p>
-
-          <div style={{ marginTop: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: colors.text }}>
-              {selectedUser.spec.authentication.type === 'scram-sha-512' ? 'Password' : 'Certificate & Key'}
-            </label>
-            <textarea
-              readOnly
-              value={userSecret}
-              style={{
-                width: '100%',
-                minHeight: '200px',
-                padding: '12px',
-                border: `1px solid ${colors.inputBorder}`,
-                borderRadius: '4px',
-                backgroundColor: colors.inputBg,
-                color: colors.text,
-                fontFamily: 'monospace',
-                fontSize: '12px',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => {
-                setShowSecretDialog(false);
-                setSelectedUser(null);
-                setUserSecret('');
-              }}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#2196f3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+  const handleCloseSecretDialog = () => {
+    setShowSecretDialog(false);
+    setSelectedUser(null);
+    setUserSecret('');
   };
 
   const renderCreateDialog = () => {
@@ -705,7 +649,7 @@ export function KafkaUserList() {
                       View Secret
                     </button>
                     <button
-                      onClick={() => handleDelete(user)}
+                      onClick={() => openDeleteDialog(user)}
                       style={{
                         padding: '6px 12px',
                         backgroundColor: '#f44336',
@@ -727,7 +671,40 @@ export function KafkaUserList() {
       )}
 
       {renderCreateDialog()}
-      {renderSecretDialog()}
+
+      {/* Secure Secret Display with confirmation dialog */}
+      <SecureSecretDisplay
+        secretValue={userSecret}
+        secretType={selectedUser?.spec.authentication.type === 'scram-sha-512' ? 'password' : 'certificate'}
+        resourceName={selectedUser?.metadata.name || ''}
+        isOpen={showSecretDialog}
+        onClose={handleCloseSecretDialog}
+      />
+
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={showDeleteDialog}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete User</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete user <strong>{deletingUser?.metadata.name}</strong>?
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Toast notifications */}
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }

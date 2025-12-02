@@ -1,9 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Angelo Cesaro
+
 import React from 'react';
-import { Kafka as K8sKafka } from '../crds';
+import { Kafka as K8sKafka, K8sListResponse } from '../crds';
 import { getClusterMode, isKRaftMode, isKafkaReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { SearchFilter, FilterGroup, FilterSelect } from './SearchFilter';
 import { KafkaTopologyModal } from './KafkaTopologyModal';
+import { getErrorMessage } from '../utils/errors';
 
 export function KafkaList() {
   const [kafkas, setKafkas] = React.useState<K8sKafka[]>([]);
@@ -18,23 +22,34 @@ export function KafkaList() {
   const [selectedKafka, setSelectedKafka] = React.useState<K8sKafka | null>(null);
   const [isTopologyModalOpen, setIsTopologyModalOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    // Fetch Kafka resources using Headlamp API
+  const fetchKafkas = React.useCallback(() => {
     ApiProxy.request('/apis/kafka.strimzi.io/v1beta2/kafkas')
-      .then((data: any) => {
-        if (data && data.items) {
-          setKafkas(data.items);
-        }
+      .then((data: K8sListResponse<K8sKafka>) => {
+        setKafkas(data.items);
       })
-      .catch((err: Error) => {
+      .catch((err: unknown) => {
         // Handle case when Strimzi CRD is not installed
-        if (err.message === 'Not Found' || err.message.includes('404')) {
+        const message = getErrorMessage(err);
+        if (message === 'Not Found' || message.includes('404')) {
           setError('Strimzi is not installed in this cluster. Please install the Strimzi operator first.');
         } else {
-          setError(err.message);
+          setError(message);
         }
       });
   }, []);
+
+  React.useEffect(() => {
+    // Initial fetch
+    fetchKafkas();
+
+    // Auto-refresh every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchKafkas();
+    }, 5000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, [fetchKafkas]);
 
   // Filter kafkas based on search and filters
   const filteredKafkas = React.useMemo(() => {
