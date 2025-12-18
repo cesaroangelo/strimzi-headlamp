@@ -2,6 +2,7 @@
 // Copyright 2025 Angelo Cesaro
 
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 import { KafkaUser, K8sListResponse } from '../crds';
 import { isUserReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
@@ -10,7 +11,7 @@ import { useThemeColors } from '../utils/theme';
 import { getErrorMessage } from '../utils/errors';
 import { SecureSecretDisplay } from './SecureSecretDisplay';
 import { Toast, ToastMessage } from './Toast';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Chip } from '@mui/material';
 
 interface ACL {
   resource: {
@@ -32,6 +33,7 @@ interface UserFormData {
 }
 
 export function KafkaUserList() {
+  const theme = useTheme();
   const [users, setUsers] = React.useState<KafkaUser[]>([]);
   const [toast, setToast] = React.useState<ToastMessage | null>(null);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
@@ -621,15 +623,25 @@ export function KafkaUserList() {
                   </td>
                   <td style={{ padding: '12px' }}>{user.spec.authorization?.type || 'None'}</td>
                   <td style={{ padding: '12px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: ready ? '#4caf50' : '#ff9800',
-                      color: 'white',
-                      fontSize: '12px'
-                    }}>
-                      {ready ? 'Ready' : 'Not Ready'}
-                    </span>
+                    <Chip
+                      label={ready ? 'Ready' : 'Not Ready'}
+                      variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
+                      size="medium"
+                      color={ready ? 'success' : 'warning'}
+                      sx={{
+                        borderRadius: '4px',
+                        ...(theme.palette.mode === 'dark' && ready && {
+                          borderColor: '#34d399',
+                          color: '#34d399',
+                          backgroundColor: 'rgba(52, 211, 153, 0.15)',
+                        }),
+                        ...(theme.palette.mode === 'dark' && !ready && {
+                          borderColor: '#f87171',
+                          color: '#f87171',
+                          backgroundColor: 'rgba(248, 113, 113, 0.15)',
+                        }),
+                      }}
+                    />
                   </td>
                   <td style={{ padding: '12px' }}>
                     <button

@@ -3,9 +3,9 @@
 
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Link } from '@mui/material';
+import { Link, Chip } from '@mui/material';
 import { Kafka as K8sKafka, K8sListResponse, KafkaNodePool } from '../crds';
-import { getClusterMode, isKRaftMode, isKafkaReady } from '../crds';
+import { getClusterMode, isKafkaReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { SearchFilter, FilterGroup, FilterSelect } from './SearchFilter';
 import { KafkaTopologyModal } from './KafkaTopologyModal';
@@ -220,7 +220,6 @@ export function KafkaList() {
           <tbody>
             {filteredKafkas.map((kafka) => {
               const mode = getClusterMode(kafka);
-              const isKRaft = isKRaftMode(kafka);
               const ready = isKafkaReady(kafka);
               const replicasDisplay = getReplicasDisplay(kafka);
 
@@ -244,32 +243,43 @@ export function KafkaList() {
                   </td>
                   <td style={{ padding: '12px' }}>{kafka.metadata.namespace}</td>
                   <td style={{ padding: '12px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: isKRaft ? theme.palette.success.main : theme.palette.info.main,
-                      color: isKRaft
-                        ? theme.palette.getContrastText(theme.palette.success.main)
-                        : theme.palette.getContrastText(theme.palette.info.main),
-                      fontSize: '12px'
-                    }}>
-                      {mode}
-                    </span>
+                    <Chip
+                      label={mode}
+                      variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
+                      size="medium"
+                      color="info"
+                      sx={{
+                        borderRadius: '4px',
+                        ...(theme.palette.mode === 'dark' && {
+                          borderColor: '#60a5fa',
+                          color: '#60a5fa',
+                          backgroundColor: 'rgba(96, 165, 250, 0.15)',
+                        }),
+                      }}
+                    />
                   </td>
                   <td style={{ padding: '12px' }}>{kafka.spec.kafka.version || 'N/A'}</td>
                   <td style={{ padding: '12px' }}>{replicasDisplay}</td>
                   <td style={{ padding: '12px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: ready ? theme.palette.success.main : theme.palette.warning.main,
-                      color: ready
-                        ? theme.palette.getContrastText(theme.palette.success.main)
-                        : theme.palette.getContrastText(theme.palette.warning.main),
-                      fontSize: '12px'
-                    }}>
-                      {ready ? 'Ready' : 'Not Ready'}
-                    </span>
+                    <Chip
+                      label={ready ? 'Ready' : 'Not Ready'}
+                      variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
+                      size="medium"
+                      color={ready ? 'success' : 'warning'}
+                      sx={{
+                        borderRadius: '4px',
+                        ...(theme.palette.mode === 'dark' && ready && {
+                          borderColor: '#34d399',
+                          color: '#34d399',
+                          backgroundColor: 'rgba(52, 211, 153, 0.15)',
+                        }),
+                        ...(theme.palette.mode === 'dark' && !ready && {
+                          borderColor: '#f87171',
+                          color: '#f87171',
+                          backgroundColor: 'rgba(248, 113, 113, 0.15)',
+                        }),
+                      }}
+                    />
                   </td>
                 </tr>
               );
