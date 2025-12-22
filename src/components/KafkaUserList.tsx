@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
-import { KafkaUser, K8sListResponse } from '../crds';
+import { KafkaUser, Kafka, K8sListResponse } from '../crds';
 import { isUserReady } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { SearchFilter, FilterGroup, FilterSelect } from './SearchFilter';
@@ -35,6 +35,7 @@ interface UserFormData {
 export function KafkaUserList() {
   const theme = useTheme();
   const [users, setUsers] = React.useState<KafkaUser[]>([]);
+  const [kafkaClusters, setKafkaClusters] = React.useState<Kafka[]>([]);
   const [toast, setToast] = React.useState<ToastMessage | null>(null);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
@@ -44,8 +45,8 @@ export function KafkaUserList() {
   const [userSecret, setUserSecret] = React.useState<string>('');
   const [formData, setFormData] = React.useState<UserFormData>({
     name: '',
-    namespace: 'kafka',
-    cluster: 'my-cluster',
+    namespace: '',
+    cluster: '',
     authenticationType: 'scram-sha-512',
     authorizationType: 'simple',
     acls: [],
@@ -55,6 +56,7 @@ export function KafkaUserList() {
 
   // Search and Filter state
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [namespaceFilter, setNamespaceFilter] = React.useState('all');
   const [statusFilter, setStatusFilter] = React.useState('all');
   const [authTypeFilter, setAuthTypeFilter] = React.useState('all');
   const [hasAclsFilter, setHasAclsFilter] = React.useState('all');
@@ -79,18 +81,62 @@ export function KafkaUserList() {
       });
   }, []);
 
+  const fetchKafkaClusters = React.useCallback(() => {
+    ApiProxy.request('/apis/kafka.strimzi.io/v1beta2/kafkas')
+      .then((data: K8sListResponse<Kafka>) => {
+        setKafkaClusters(data.items);
+      })
+      .catch((err: unknown) => {
+        const message = getErrorMessage(err);
+        if (!message.includes('404') && message !== 'Not Found') {
+          console.error('Failed to fetch Kafka clusters:', message);
+        }
+      });
+  }, []);
+
   React.useEffect(() => {
     // Initial fetch
     fetchUsers();
+    fetchKafkaClusters();
 
     // Auto-refresh every 5 seconds
     const intervalId = setInterval(() => {
       fetchUsers();
+      fetchKafkaClusters();
     }, 5000);
 
     // Cleanup interval on unmount
     return () => clearInterval(intervalId);
-  }, [fetchUsers]);
+  }, [fetchUsers, fetchKafkaClusters]);
+
+  // Calculate available namespaces from fetched users (for filtering)
+  const availableNamespaces = React.useMemo(() => {
+    return [...new Set(users.map(u => u.metadata.namespace))].sort();
+  }, [users]);
+
+  // Namespace filter options
+  const namespaceOptions = React.useMemo(() => [
+    { value: 'all', label: 'All' },
+    ...availableNamespaces.map(ns => ({ value: ns, label: ns }))
+  ], [availableNamespaces]);
+
+  // Calculate available namespaces and cluster names for create dialog
+  const availableNamespacesForCreate = React.useMemo(() => {
+    return [...new Set(kafkaClusters.map(k => k.metadata.namespace))].sort();
+  }, [kafkaClusters]);
+
+  const availableClusterNames = React.useMemo(() => {
+    return kafkaClusters.map(k => k.metadata.name).sort();
+  }, [kafkaClusters]);
+
+  // Filter clusters based on selected namespace (for create dialog)
+  const filteredClusterNames = React.useMemo(() => {
+    if (!formData.namespace) return [];
+    return kafkaClusters
+      .filter(k => k.metadata.namespace === formData.namespace)
+      .map(k => k.metadata.name)
+      .sort();
+  }, [kafkaClusters, formData.namespace]);
 
   // Filter users based on search and filters
   const filteredUsers = React.useMemo(() => {
@@ -103,6 +149,11 @@ export function KafkaUserList() {
         user.metadata.namespace.toLowerCase().includes(searchLower);
 
       if (!matchesSearch) return false;
+
+      // Namespace filter
+      if (namespaceFilter !== 'all' && user.metadata.namespace !== namespaceFilter) {
+        return false;
+      }
 
       // Status filter
       if (statusFilter !== 'all') {
@@ -128,7 +179,7 @@ export function KafkaUserList() {
 
       return true;
     });
-  }, [users, searchTerm, statusFilter, authTypeFilter, hasAclsFilter]);
+  }, [users, searchTerm, namespaceFilter, statusFilter, authTypeFilter, hasAclsFilter]);
 
   const fetchUserSecret = async (user: KafkaUser) => {
     try {
@@ -198,8 +249,8 @@ export function KafkaUserList() {
       const userName = formData.name;
       setFormData({
         name: '',
-        namespace: 'kafka',
-        cluster: 'my-cluster',
+        namespace: availableNamespacesForCreate.length > 0 ? availableNamespacesForCreate[0] : '',
+        cluster: availableClusterNames.length > 0 ? availableClusterNames[0] : '',
         authenticationType: 'scram-sha-512',
         authorizationType: 'simple',
         acls: [],
@@ -337,22 +388,47 @@ export function KafkaUserList() {
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Namespace</label>
-            <input
-              type="text"
+            <select
               value={formData.namespace}
-              onChange={(e) => setFormData({ ...formData, namespace: e.target.value })}
-              style={{ width: '100%', padding: '8px', border: `1px solid ${colors.inputBorder}`, borderRadius: '4px', backgroundColor: colors.inputBg, color: colors.text }}
-            />
+              onChange={(e) => {
+                const newNamespace = e.target.value;
+                const clustersInNamespace = kafkaClusters
+                  .filter(k => k.metadata.namespace === newNamespace)
+                  .map(k => k.metadata.name)
+                  .sort();
+                setFormData({
+                  ...formData,
+                  namespace: newNamespace,
+                  cluster: clustersInNamespace.length > 0 ? clustersInNamespace[0] : ''
+                });
+              }}
+              style={{ width: '100%', padding: '8px', border: `1px solid ${colors.inputBorder}`, borderRadius: '4px', backgroundColor: colors.inputBg, color: colors.text, cursor: 'pointer' }}
+            >
+              {availableNamespacesForCreate.length === 0 ? (
+                <option value="">No namespaces available</option>
+              ) : (
+                availableNamespacesForCreate.map(ns => (
+                  <option key={ns} value={ns}>{ns}</option>
+                ))
+              )}
+            </select>
           </div>
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Cluster</label>
-            <input
-              type="text"
+            <select
               value={formData.cluster}
               onChange={(e) => setFormData({ ...formData, cluster: e.target.value })}
-              style={{ width: '100%', padding: '8px', border: `1px solid ${colors.inputBorder}`, borderRadius: '4px', backgroundColor: colors.inputBg, color: colors.text }}
-            />
+              style={{ width: '100%', padding: '8px', border: `1px solid ${colors.inputBorder}`, borderRadius: '4px', backgroundColor: colors.inputBg, color: colors.text, cursor: 'pointer' }}
+            >
+              {filteredClusterNames.length === 0 ? (
+                <option value="">No clusters available in this namespace</option>
+              ) : (
+                filteredClusterNames.map(cluster => (
+                  <option key={cluster} value={cluster}>{cluster}</option>
+                ))
+              )}
+            </select>
           </div>
 
           <div style={{ marginBottom: '16px' }}>
@@ -477,8 +553,8 @@ export function KafkaUserList() {
                 setShowCreateDialog(false);
                 setFormData({
                   name: '',
-                  namespace: 'kafka',
-                  cluster: 'my-cluster',
+                  namespace: availableNamespacesForCreate.length > 0 ? availableNamespacesForCreate[0] : '',
+                  cluster: availableClusterNames.length > 0 ? availableClusterNames[0] : '',
                   authenticationType: 'scram-sha-512',
                   authorizationType: 'simple',
                   acls: [],
@@ -524,7 +600,17 @@ export function KafkaUserList() {
           <p style={{ margin: '8px 0 0 0', color: '#666' }}>Strimzi Kafka users</p>
         </div>
         <Button
-          onClick={() => setShowCreateDialog(true)}
+          onClick={() => {
+            setFormData({
+              name: '',
+              namespace: availableNamespacesForCreate.length > 0 ? availableNamespacesForCreate[0] : '',
+              cluster: availableClusterNames.length > 0 ? availableClusterNames[0] : '',
+              authenticationType: 'scram-sha-512',
+              authorizationType: 'simple',
+              acls: [],
+            });
+            setShowCreateDialog(true);
+          }}
           variant="contained"
           color="primary"
           size="medium"
@@ -541,7 +627,17 @@ export function KafkaUserList() {
         resultCount={filteredUsers.length}
         totalCount={users.length}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+          {availableNamespaces.length > 0 && (
+            <FilterGroup label="Namespace">
+              <FilterSelect
+                value={namespaceFilter}
+                onChange={setNamespaceFilter}
+                options={namespaceOptions}
+              />
+            </FilterGroup>
+          )}
+
           <FilterGroup label="Status">
             <FilterSelect
               value={statusFilter}
