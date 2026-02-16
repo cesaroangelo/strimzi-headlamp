@@ -31,7 +31,7 @@ A Headlamp plugin for managing Strimzi (Apache Kafka on Kubernetes) resources di
 #### 📦 Install from npm
 
 ```bash
-npm install @headlamp-k8s/strimzi
+npm install strimzi-headlamp
 ```
 
 #### 💾 Manual Installation
@@ -120,7 +120,7 @@ This creates a tarball `headlamp-k8s-strimzi-<version>.tar.gz` containing:
    # Create package.json (required)
    cat > ~/Library/Application\ Support/Headlamp/plugins/strimzi/package.json << 'EOF'
    {
-     "name": "@headlamp-k8s/strimzi",
+     "name": "strimzi-headlamp",
      "version": "0.1.0",
      "main": "main.js"
    }
@@ -135,7 +135,7 @@ This creates a tarball `headlamp-k8s-strimzi-<version>.tar.gz` containing:
    # Create package.json (required)
    cat > ~/.config/Headlamp/plugins/strimzi/package.json << 'EOF'
    {
-     "name": "@headlamp-k8s/strimzi",
+     "name": "strimzi-headlamp",
      "version": "0.1.0",
      "main": "main.js"
    }
@@ -384,17 +384,9 @@ The `files` field in `package.json` ensures only these are published:
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to fork the repository and open a pull request.
-
-## 💬 Support
-
-For support, feature requests, or bug reports, please open an issue in the [GitHub repository](https://github.com/cesaroangelo/strimzi-headlamp/issues).
-
 ---
 
-Developed with ❤️ on 🌎 by [Angelo Cesaro](https://angelocesaro.com)
+Developed on 🌎
 
 ## 📚 Resources
 
