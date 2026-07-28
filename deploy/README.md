@@ -37,7 +37,7 @@ Edit either `headlamp.yaml` or `headlamp-minimal.yaml` and find this section:
 volumes:
   - name: plugins
     hostPath:
-      path: /Users/angelo/Downloads/github/strimzi-headlamp/plugins  # UPDATE THIS PATH
+      path: /path/to/strimzi-headlamp/plugins  # UPDATE THIS PATH
       type: Directory
 ```
 
