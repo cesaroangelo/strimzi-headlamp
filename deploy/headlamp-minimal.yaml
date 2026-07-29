@@ -115,7 +115,7 @@ spec:
           hostPath:
             # Docker Desktop on macOS with VirtioFS: use direct path
             # For older Docker Desktop versions, may need /run/desktop/mnt/host prefix
-            path: /Users/angelo/Downloads/github/strimzi-headlamp/plugins
+            path: /path/to/strimzi-headlamp/plugins
             type: Directory
 ---
 # Service to expose Headlamp
