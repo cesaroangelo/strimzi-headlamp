@@ -2,6 +2,7 @@ import React from 'react';
 import { ConditionsSection, DetailsGrid } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { useParams } from 'react-router-dom';
 import { KafkaTopic } from '../../resources/kafkaTopic';
+import { ReadyChip } from '../ReadyChip';
 
 export function KafkaTopicDetail(props: { namespace?: string; name?: string }) {
   const params = useParams<{ namespace: string; name: string }>();
@@ -18,7 +19,7 @@ export function KafkaTopicDetail(props: { namespace?: string; name?: string }) {
           ? [
               { name: 'Partitions', value: item.partitions },
               { name: 'Replicas', value: item.replicas },
-              { name: 'Status', value: String(item.readyStatus ?? 'Unknown') },
+              { name: 'Status', value: <ReadyChip status={item.readyStatus} /> },
             ]
           : []
       }

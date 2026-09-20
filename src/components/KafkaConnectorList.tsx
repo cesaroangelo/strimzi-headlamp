@@ -21,6 +21,7 @@ import { getErrorMessage } from '../utils/errors';
 import { useStrimziApiVersions } from '../hooks/useStrimziApiVersions';
 import { StrimziNotInstalledMessage } from './StrimziNotInstalledMessage';
 import { readyChipProps } from '../utils/readyChip';
+import { ReadyChip } from './ReadyChip';
 import { Toast, ToastMessage } from './Toast';
 
 const STATE_CHIP_COLORS: Record<KafkaConnectorState, 'success' | 'warning' | 'default'> = {
@@ -123,19 +124,8 @@ export function KafkaConnectorList() {
     {
       id: 'status',
       label: 'Status',
-      getValue: (item: KafkaConnector) => String(item.readyStatus ?? 'Unknown'),
-      render: (item: KafkaConnector) => {
-        const { label, color } = readyChipProps(item.readyStatus);
-        return (
-          <Chip
-            label={label}
-            variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
-            size="medium"
-            color={color}
-            sx={{ borderRadius: '4px' }}
-          />
-        );
-      },
+      getValue: (item: KafkaConnector) => readyChipProps(item.readyStatus).label,
+      render: (item: KafkaConnector) => <ReadyChip status={item.readyStatus} />,
     },
     {
       id: 'actions',

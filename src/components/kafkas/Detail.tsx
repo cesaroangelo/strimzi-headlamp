@@ -7,6 +7,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { useParams } from 'react-router-dom';
 import { Kafka } from '../../resources/kafka';
+import { ReadyChip } from '../ReadyChip';
 
 export function KafkaDetail(props: { namespace?: string; name?: string }) {
   const params = useParams<{ namespace: string; name: string }>();
@@ -24,7 +25,7 @@ export function KafkaDetail(props: { namespace?: string; name?: string }) {
               { name: 'Mode', value: item.clusterMode },
               { name: 'Kafka Version', value: item.kafkaVersion },
               { name: 'Replicas', value: item.replicasDisplay },
-              { name: 'Status', value: String(item.readyStatus ?? 'Unknown') },
+              { name: 'Status', value: <ReadyChip status={item.readyStatus} /> },
             ]
           : []
       }

@@ -10,6 +10,8 @@ import { KafkaTopologyModal } from './KafkaTopologyModal';
 import type { KafkaInterface } from '../resources/kafka';
 import { useStrimziApiVersions } from '../hooks/useStrimziApiVersions';
 import { StrimziNotInstalledMessage } from './StrimziNotInstalledMessage';
+import { ReadyChip } from './ReadyChip';
+import { readyChipProps } from '../utils/readyChip';
 
 export function KafkaList() {
   const { ready, installed } = useStrimziApiVersions();
@@ -41,7 +43,8 @@ export function KafkaList() {
     {
       id: 'status',
       label: 'Status',
-      getValue: (item: Kafka) => String(item.readyStatus ?? 'Unknown'),
+      getValue: (item: Kafka) => readyChipProps(item.readyStatus).label,
+      render: (item: Kafka) => <ReadyChip status={item.readyStatus} />,
     },
     {
       id: 'topology',

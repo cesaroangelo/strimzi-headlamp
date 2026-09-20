@@ -8,6 +8,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { useParams } from 'react-router-dom';
 import { KafkaConnect } from '../../resources/kafkaConnect';
+import { ReadyChip } from '../ReadyChip';
 
 /**
  * Detail page for a single `KafkaConnect` resource.
@@ -33,7 +34,7 @@ export function KafkaConnectDetail(props: { namespace?: string; name?: string })
               { name: 'Replicas', value: item.replicas },
               { name: 'Bootstrap servers', value: item.bootstrapServers || '-' },
               { name: 'Connect URL', value: item.connectUrl || '-' },
-              { name: 'Status', value: String(item.readyStatus ?? 'Unknown') },
+              { name: 'Status', value: <ReadyChip status={item.readyStatus} /> },
             ]
           : []
       }

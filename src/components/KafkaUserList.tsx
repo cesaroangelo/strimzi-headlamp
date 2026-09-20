@@ -1,6 +1,5 @@
 import React from 'react';
-import { useTheme } from '@mui/material/styles';
-import { Button, Chip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   ResourceListView,
@@ -14,11 +13,12 @@ import { clusterNamespaces, clusterNamesInNamespace } from '../utils/clusters';
 import { useStrimziApiVersions } from '../hooks/useStrimziApiVersions';
 import { StrimziNotInstalledMessage } from './StrimziNotInstalledMessage';
 import { SecureSecretDisplay } from './SecureSecretDisplay';
+import { ReadyChip } from './ReadyChip';
+import { readyChipProps } from '../utils/readyChip';
 import { Toast, ToastMessage } from './Toast';
 import { KafkaUserCreateFormModal, type UserFormData } from './KafkaUserCreateFormModal';
 
 export function KafkaUserList() {
-  const theme = useTheme();
   const { ready, installed, kafka: kafkaVersion } = useStrimziApiVersions();
   const kafkaApiPath = `/apis/kafka.strimzi.io/${kafkaVersion}`;
 
@@ -226,21 +226,8 @@ export function KafkaUserList() {
     {
       id: 'status',
       label: 'Status',
-      getValue: (item: KafkaUser) => String(item.readyStatus ?? 'Unknown'),
-      render: (item: KafkaUser) => {
-        const status = item.readyStatus;
-        const label = status === 'True' ? 'Ready' : status == null ? 'Unknown' : 'Not Ready';
-        const chipColor = status === 'True' ? 'success' : status == null ? 'default' : 'warning';
-        return (
-          <Chip
-            label={label}
-            variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
-            size="medium"
-            color={chipColor}
-            sx={{ borderRadius: '4px' }}
-          />
-        );
-      },
+      getValue: (item: KafkaUser) => readyChipProps(item.readyStatus).label,
+      render: (item: KafkaUser) => <ReadyChip status={item.readyStatus} />,
     },
     {
       id: 'actions',

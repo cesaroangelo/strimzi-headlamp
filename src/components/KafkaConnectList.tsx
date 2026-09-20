@@ -1,6 +1,4 @@
 import React from 'react';
-import { Chip } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import {
   ResourceListView,
   type ColumnType,
@@ -8,6 +6,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { KafkaConnect } from '../resources/kafkaConnect';
 import { readyChipProps } from '../utils/readyChip';
+import { ReadyChip } from './ReadyChip';
 import { useStrimziApiVersions } from '../hooks/useStrimziApiVersions';
 import { StrimziNotInstalledMessage } from './StrimziNotInstalledMessage';
 
@@ -20,7 +19,6 @@ import { StrimziNotInstalledMessage } from './StrimziNotInstalledMessage';
  * connector plugins.
  */
 export function KafkaConnectList() {
-  const theme = useTheme();
   const { ready, installed } = useStrimziApiVersions();
 
   if (ready && !installed) return <StrimziNotInstalledMessage />;
@@ -51,19 +49,8 @@ export function KafkaConnectList() {
     {
       id: 'status',
       label: 'Status',
-      getValue: (item: KafkaConnect) => String(item.readyStatus ?? 'Unknown'),
-      render: (item: KafkaConnect) => {
-        const { label, color } = readyChipProps(item.readyStatus);
-        return (
-          <Chip
-            label={label}
-            variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
-            size="medium"
-            color={color}
-            sx={{ borderRadius: '4px' }}
-          />
-        );
-      },
+      getValue: (item: KafkaConnect) => readyChipProps(item.readyStatus).label,
+      render: (item: KafkaConnect) => <ReadyChip status={item.readyStatus} />,
     },
     'age',
   ];

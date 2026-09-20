@@ -18,6 +18,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { KafkaConnector } from '../../resources/kafkaConnector';
 import { isSecretLikeKey } from '../../utils/secretKeys';
+import { ReadyChip } from '../ReadyChip';
 
 const MASK = '••••••••';
 
@@ -139,7 +140,7 @@ export function KafkaConnectorDetail(props: { namespace?: string; name?: string 
                 { name: 'Tasks max', value: item.tasksMax ?? '-' },
                 { name: 'Desired state', value: item.desiredState },
                 { name: 'Runtime state', value: item.runtimeState ?? '-' },
-                { name: 'Status', value: String(item.readyStatus ?? 'Unknown') },
+                { name: 'Status', value: <ReadyChip status={item.readyStatus} /> },
               ]
             : []
         }
