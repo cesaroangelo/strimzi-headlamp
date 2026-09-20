@@ -42,8 +42,9 @@ export function KafkaConnectorList() {
   const theme = useTheme();
   const { ready, installed, kafka: kafkaVersion } = useStrimziApiVersions();
 
-  if (ready && !installed) return <StrimziNotInstalledMessage />;
-
+  // All hooks must be called before any early return (Rules of Hooks).
+  // `installed` flips from true to false once the API probe resolves, so
+  // returning early above these would change the hook count between renders.
   const [toast, setToast] = React.useState<ToastMessage | null>(null);
   const [pendingState, setPendingState] = React.useState<{
     connector: KafkaConnectorInterface;
@@ -188,6 +189,8 @@ export function KafkaConnectorList() {
     },
     'age',
   ];
+
+  if (ready && !installed) return <StrimziNotInstalledMessage />;
 
   return (
     <>

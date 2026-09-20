@@ -14,8 +14,9 @@ import { StrimziNotInstalledMessage } from './StrimziNotInstalledMessage';
 export function KafkaList() {
   const { ready, installed } = useStrimziApiVersions();
 
-  if (ready && !installed) return <StrimziNotInstalledMessage />;
-
+  // All hooks must be called before any early return (Rules of Hooks).
+  // `installed` flips from true to false once the API probe resolves, so
+  // returning early above these would change the hook count between renders.
   const [selectedKafka, setSelectedKafka] = React.useState<KafkaInterface | null>(null);
   const [isTopologyModalOpen, setIsTopologyModalOpen] = React.useState(false);
 
@@ -61,6 +62,8 @@ export function KafkaList() {
     },
     'age',
   ];
+
+  if (ready && !installed) return <StrimziNotInstalledMessage />;
 
   return (
     <>
