@@ -411,6 +411,8 @@ Developed on 🌎
 
 ## 📚 Resources
 
+- [Demo walkthrough](docs/DEMO.md) - cluster prep, sample manifests, UI tour
+- [Storybook and local testing](STORYBOOK_AND_LOCAL_TESTING.md)
 - [Strimzi Documentation](https://strimzi.io/documentation/)
 - [Headlamp Plugin Development](https://headlamp.dev/docs/latest/development/plugins/)
 - [Apache Kafka](https://kafka.apache.org/)

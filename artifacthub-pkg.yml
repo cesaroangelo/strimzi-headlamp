@@ -1,4 +1,4 @@
-version: 0.3.9
+version: 0.5.0
 name: headlamp_strimzi
 displayName: Strimzi
 createdAt: 2026-03-07T00:25:11Z
@@ -36,8 +36,14 @@ readme: |
     - Configure ACLs for fine-grained authorization
     - View passwords and certificates (secrets)
     - Delete users with confirmation
-  - **Search & Filter**: Real-time search and advanced filtering on all lists
-    - Filter by status, mode, authentication type, partitions, replicas, and more
+  - **Kafka Connect**: View `KafkaConnect` clusters, their connector plugins,
+    and the Connect REST endpoint
+  - **Kafka Connectors**: Manage connectors with pause, resume and start, with
+    credential-like configuration values masked behind an explicit reveal
+  - **Resource Map**: Strimzi resources appear on Headlamp's map, linked to the
+    Kafka cluster they target
+  - **Search & Filter**: Free-text search across columns, per-column sorting,
+    and the shared namespace selector on every list
   - Real-time status monitoring for all Strimzi resources
   - Multi-namespace support - view resources across all namespaces
 
@@ -45,11 +51,46 @@ readme: |
 
   - [Headlamp](https://headlamp.dev/) installed
   - A Kubernetes cluster with [Strimzi operator](https://strimzi.io/) deployed
+    (0.x with `v1beta2` APIs, or 1.0+ with `v1`; the plugin detects which the
+    cluster serves)
 maintainers:
   - name: Angelo Cesaro
     email: cesaro.angelo@gmail.com
 provider:
   name: Angelo Cesaro
+changes:
+  - kind: added
+    description: "Add KafkaConnect list and detail views"
+  - kind: added
+    description: "Add KafkaConnector support with pause, resume and start actions"
+  - kind: added
+    description: "Add resource map integration for Kafka topics, users, Connect clusters and connectors"
+  - kind: added
+    description: "Add detail pages for all five Strimzi resource types"
+  - kind: added
+    description: "Detect the Strimzi API version served by the cluster at runtime"
+  - kind: changed
+    description: "Declare both v1 and v1beta2 on resource classes for Strimzi 1.x and older clusters"
+  - kind: changed
+    description: "Render the Ready condition through one shared chip across every list and detail page"
+  - kind: changed
+    description: "Mask credential-like keys in connector configurations"
+  - kind: changed
+    description: "Update headlamp-plugin to 0.14.0 and refresh dependencies"
+  - kind: fixed
+    description: "Fix empty Kafka cluster lists and detail pages on Strimzi 1.x"
+  - kind: fixed
+    description: "Fix crashes on the Kafka Clusters and Kafka Connectors pages when Strimzi is not installed"
+  - kind: fixed
+    description: "Fix crashes on the Kafka Topics and Users pages while the cluster list is loading"
+  - kind: fixed
+    description: "Fix topology edit buttons pointing at v1beta2 URLs on Strimzi 1.x"
+  - kind: fixed
+    description: "Fix an Unknown Ready condition being shown as Not Ready on the Topics and Users lists"
+  - kind: fixed
+    description: "Fix a leaked toast timer and needless re-renders on the Topics and Users lists"
+  - kind: removed
+    description: "Remove the SearchFilter component, superseded by the shared list view search"
 annotations:
   headlamp/plugin/archive-url: https://github.com/cesaroangelo/strimzi-headlamp/releases/download/v0.3.9/acesaro-strimzi-headlamp-0.3.9.tar.gz
   headlamp/plugin/archive-checksum: "sha256:2965b3272224e797db556a00100667255b6c49d0ccd470405ff8e9a0228d7186"

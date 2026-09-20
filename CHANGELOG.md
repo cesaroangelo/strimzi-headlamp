@@ -2,10 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.5.0] - 2026-09-20
+
+### Added
+- Kafka Connect: list and detail views for `KafkaConnect` clusters, including
+  the connector plugins discovered by the operator and the Connect REST URL
+- Kafka Connectors: list and detail views for `KafkaConnector`, with pause,
+  resume and start applied as a JSON merge-patch on `spec.state` so the action
+  is safe on GitOps-managed resources; credential-like config keys are masked
+  behind an explicit reveal step
+- Detail pages for Kafka, KafkaTopic, KafkaUser, KafkaConnect and KafkaConnector
+- Resource Map integration, with edges from topics, users and connectors to the
+  Kafka cluster named in their `strimzi.io/cluster` label
+- Kind icons for all five Strimzi resource types
+- Support for Strimzi 1.x: the resource classes declare both `v1` and `v1beta2`,
+  and a runtime probe of `/apis` picks the version the cluster actually serves
+- A friendly empty state when the Strimzi CRDs are not installed, and an error
+  boundary so a plugin error can never take down Headlamp's root React tree
+- Storybook with MSW mocks, and sample manifests under `test-files/`
+- `react-hooks` lint rules, enabled as errors
+
+### Changed
+- Lists are built on Headlamp's `ResourceListView` and the resources on
+  `KubeObject` classes, which cut the list components by about two thirds
+- The `Ready` condition renders through one shared `ReadyChip` everywhere,
+  and the status columns sort and search on the label they display
+- headlamp-plugin 0.13.0 to 0.14.0
 
 ### Fixed
-- Crash on the Kafka Topics and Users pages when the Kafka cluster list was still loading
+- Crash on the Kafka Topics and Users pages when the Kafka cluster list was
+  still loading
+- Crash on the Kafka Clusters and Kafka Connectors pages on a cluster without
+  Strimzi installed, caused by hooks called after an early return
+- Topology edit buttons pointing at `v1beta2` URLs on Strimzi 1.x clusters
+- A `Ready` condition reported as `Unknown` shown as "Not Ready" on the Topics
+  and Users lists
+- Toast leaking its fade-out timer when unmounted mid-animation
+- Wasted re-renders on the Topics and Users lists from an unmemoised fallback
+
+### Removed
+- The `SearchFilter` component, superseded by `ResourceListView`'s own search
+- The `main` field from `package.json`, which Headlamp does not use
 
 ## [0.3.9] - 2026-03-07
 
