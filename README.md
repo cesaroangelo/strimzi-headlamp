@@ -33,8 +33,9 @@ A Headlamp plugin for managing Strimzi (Apache Kafka on Kubernetes) resources di
   - Detail page exposes the full connector configuration (with credential-like
     values masked behind an explicit reveal step), the Connect task list,
     and topic associations
-- **Search & Filter**: Real-time search and advanced filtering on all lists
-  - Filter by status, mode, authentication type, partitions, replicas, and more
+- **Search & Filter**: Every list is a Headlamp `ResourceListView`, so it comes
+  with free-text search across all columns, per-column sorting, and the
+  namespace selector shared with the rest of the UI
 - Real-time status monitoring for all Strimzi resources
 - Multi-namespace support - view resources across all namespaces
 
