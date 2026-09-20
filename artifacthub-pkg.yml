@@ -18,41 +18,31 @@ screenshots:
 readme: |
   # Strimzi Headlamp Plugin
 
-  A Headlamp plugin for managing Strimzi (Apache Kafka on Kubernetes) resources directly from the Headlamp UI.
-
-  ## Demo
-
-  [![Plugin Demo](https://img.youtube.com/vi/MNt28s6b5d8/sddefault.jpg)](https://www.youtube.com/watch?v=MNt28s6b5d8)
+  Manage Strimzi resources - Apache Kafka on Kubernetes - from the Headlamp UI.
 
   ## Features
 
-  - **Kafka Clusters**: View Kafka cluster resources with KRaft/ZooKeeper mode detection
-  - **Kafka Topics**: Full CRUD operations (Create, Read, Update, Delete)
-    - Create topics with custom partitions, replicas, retention, and compression
-    - Edit topic configurations (partitions, replicas, retention, min ISR)
-    - Delete topics with confirmation
-  - **Kafka Users**: Complete user management with security
-    - Create users with SCRAM-SHA-512 or TLS authentication
-    - Configure ACLs for fine-grained authorization
-    - View passwords and certificates (secrets)
-    - Delete users with confirmation
-  - **Kafka Connect**: View `KafkaConnect` clusters, their connector plugins,
-    and the Connect REST endpoint
-  - **Kafka Connectors**: Manage connectors with pause, resume and start, with
-    credential-like configuration values masked behind an explicit reveal
-  - **Resource Map**: Strimzi resources appear on Headlamp's map, linked to the
-    Kafka cluster they target
-  - **Search & Filter**: Free-text search across columns, per-column sorting,
-    and the shared namespace selector on every list
-  - Real-time status monitoring for all Strimzi resources
-  - Multi-namespace support - view resources across all namespaces
+  - **Kafka clusters**: status, version, replicas, KRaft or ZooKeeper mode, and
+    a topology view of node pools and pods
+  - **Topics**: create, edit and delete, with partitions, replicas, retention,
+    compression and min in-sync replicas
+  - **Users**: create and delete, with SCRAM-SHA-512 or TLS authentication and
+    ACL rules; view the generated password or certificate
+  - **Connect clusters**: replicas, version, bootstrap servers, the REST
+    endpoint, and the connector plugins the operator found
+  - **Connectors**: desired state against runtime state, per-task detail, and
+    pause, resume or start in one step; values that look like credentials stay
+    masked until you ask for them
+  - **Resource map**: Strimzi resources appear on Headlamp's map, linked to the
+    cluster they belong to
+  - Works across namespaces, with search and sorting on every list
 
-  ## Prerequisites
+  ## Requirements
 
-  - [Headlamp](https://headlamp.dev/) installed
-  - A Kubernetes cluster with [Strimzi operator](https://strimzi.io/) deployed
-    (0.x with `v1beta2` APIs, or 1.0+ with `v1`; the plugin detects which the
-    cluster serves)
+  - Headlamp 0.22 or later
+  - A cluster running the Strimzi operator. Both API versions work: `v1beta2`
+    on Strimzi 0.x, and `v1` on Strimzi 1.0 and later. The plugin checks which
+    one the cluster serves and uses it.
 maintainers:
   - name: Angelo Cesaro
     email: cesaro.angelo@gmail.com

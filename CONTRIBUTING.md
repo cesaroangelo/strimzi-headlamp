@@ -1,43 +1,47 @@
-# Contributing to Strimzi Headlamp Plugin
+# Contributing
 
-Thank you for your interest in contributing to the Strimzi Headlamp Plugin!
+Thanks for your interest in the plugin.
 
-## Getting Started
+## Getting started
 
-1. Fork the repository
-2. Clone your fork locally
-3. Install dependencies: `npm install`
-4. Create a new branch for your feature or bugfix
+```bash
+git clone https://github.com/cesaroangelo/strimzi-headlamp.git
+cd strimzi-headlamp
+npm install
+git switch -c my-change
+```
 
-## Development Workflow
+## Before you open a pull request
 
-1. Make your changes
-2. Format your code: `npm run format`
-3. Run the linter: `npm run lint`
-4. Build the plugin: `npm run build`
-5. Test your changes locally (see README.md for testing instructions)
+```bash
+npm run format
+npm run lint
+npm run tsc
+npm run test
+npm run build
+```
 
-## Code Style
+To try your change in Headlamp, see [Local testing](docs/LOCAL-TESTING.md).
 
-- Follow the existing code style
-- Use TypeScript for all new code
-- Use functional components with hooks for React components
-- Keep components simple and focused
-- Add comments for complex logic
+## Code style
 
-## Commit Messages
+- TypeScript everywhere.
+- Function components with hooks.
+- Comment why, not what. Explain the non-obvious choices.
+- Pure logic belongs in `src/utils/`, where it can be unit tested.
 
-- Use clear and descriptive commit messages
-- Start with a verb in present tense (e.g., "Add", "Fix", "Update")
-- Reference issue numbers when applicable
+## Commit messages
 
-## Pull Requests
+- One short line in the present tense: "Add", "Fix", "Update".
+- Explain the reason in the body when the change is not obvious.
+- Do not add trailers such as `Co-Authored-By`. Pull request checks reject them.
 
-1. Ensure all tests pass and code is formatted
-2. Update documentation if needed
-3. Describe your changes clearly in the PR description
-4. Link related issues
+## Pull requests
 
-## Questions?
+- Update `CHANGELOG.md` under an `Unreleased` heading.
+- Update the docs if behaviour changes.
+- Link the related issue.
 
-Feel free to open an issue for any questions or discussions.
+## Questions
+
+Open an issue.

@@ -5,7 +5,7 @@ YAML samples to deploy Kafka clusters, topics, and users so you can exercise the
 ## Prerequisites
 
 - A Kubernetes cluster you can `kubectl apply` to
-- [Strimzi Cluster Operator](https://strimzi.io/docs/operators/latest/deploying.html) installed (version that supports `kafka.strimzi.io/v1beta2`)
+- [Strimzi Cluster Operator](https://strimzi.io/docs/operators/latest/deploying.html) installed (any version: the plugin works with both `v1beta2` and `v1`)
 - Enough resources for ephemeral Kafka (or edit storage to use your `StorageClass`)
 
 ## Layout
