@@ -12,6 +12,7 @@ import type {
   KafkaConnectorState,
 } from '../resources/kafkaConnector';
 import { getConnectorDesiredState } from '../crds-helpers';
+import { ReadyChip } from './ReadyChip';
 import { mockKafkaConnectors } from '../storybookMocks/strimziMocks';
 
 function connectorReadyStatus(c: KafkaConnectorInterface): string {
@@ -48,20 +49,6 @@ export function PureKafkaConnectorList({ items, onTogglePause }: PureKafkaConnec
     />
   );
 
-  const statusChip = (c: KafkaConnectorInterface) => {
-    const status = connectorReadyStatus(c);
-    const ready = status === 'True';
-    const unknown = status === 'Unknown';
-    return (
-      <Chip
-        label={ready ? 'Ready' : unknown ? 'Unknown' : 'Not Ready'}
-        variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
-        size="medium"
-        color={ready ? 'success' : unknown ? 'default' : 'warning'}
-        sx={{ borderRadius: '4px' }}
-      />
-    );
-  };
 
   const action = (c: KafkaConnectorInterface) => {
     const desired = getConnectorDesiredState(c);
@@ -123,7 +110,12 @@ export function PureKafkaConnectorList({ items, onTogglePause }: PureKafkaConnec
             getter: row =>
               row.status?.connectorStatus?.connector?.state?.toLowerCase() ?? '-',
           },
-          { label: 'Status', getter: statusChip },
+          {
+            label: 'Status',
+            getter: (row: KafkaConnectorInterface) => (
+              <ReadyChip status={connectorReadyStatus(row)} />
+            ),
+          },
           { label: 'Actions', getter: action },
           {
             label: 'Age',

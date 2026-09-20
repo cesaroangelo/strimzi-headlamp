@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, Chip } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Box } from '@mui/material';
 import {
   DateLabel,
   SectionHeader,
@@ -8,6 +7,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Meta, StoryObj } from '@storybook/react';
 import type { KafkaConnectInterface } from '../resources/kafkaConnect';
+import { ReadyChip } from './ReadyChip';
 import { mockKafkaConnects } from '../storybookMocks/strimziMocks';
 
 function connectReadyStatus(c: KafkaConnectInterface): string {
@@ -26,22 +26,7 @@ interface PureKafkaConnectListProps {
  * it without a cluster.
  */
 export function PureKafkaConnectList({ items }: PureKafkaConnectListProps) {
-  const theme = useTheme();
 
-  const statusChip = (c: KafkaConnectInterface) => {
-    const status = connectReadyStatus(c);
-    const ready = status === 'True';
-    const unknown = status === 'Unknown';
-    return (
-      <Chip
-        label={ready ? 'Ready' : unknown ? 'Unknown' : 'Not Ready'}
-        variant={theme.palette.mode === 'dark' ? 'outlined' : 'filled'}
-        size="medium"
-        color={ready ? 'success' : unknown ? 'default' : 'warning'}
-        sx={{ borderRadius: '4px' }}
-      />
-    );
-  };
 
   return (
     <Box>
@@ -54,7 +39,12 @@ export function PureKafkaConnectList({ items }: PureKafkaConnectListProps) {
           { label: 'Replicas', getter: row => row.spec?.replicas ?? 0 },
           { label: 'Bootstrap servers', getter: row => row.spec?.bootstrapServers ?? '-' },
           { label: 'Plugins', getter: row => row.status?.connectorPlugins?.length ?? 0 },
-          { label: 'Status', getter: statusChip },
+          {
+            label: 'Status',
+            getter: (row: KafkaConnectInterface) => (
+              <ReadyChip status={connectReadyStatus(row)} />
+            ),
+          },
           {
             label: 'Age',
             getter: row => <DateLabel date={row.metadata.creationTimestamp} format="mini" />,
