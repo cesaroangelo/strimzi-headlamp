@@ -70,12 +70,12 @@ operator version. `StrimziPodSet` comes from `core.strimzi.io`.
 
 | Resource | What you can do |
 |---|---|
-| `Kafka` | View spec and status, listener addresses, cluster mode; open the topology view |
-| `KafkaNodePool`, `StrimziPodSet` | Shown in the topology view, with an inline editor |
-| `KafkaTopic` | Create, edit, delete |
-| `KafkaUser` | Create, delete, reveal the credential secret |
-| `KafkaConnect` | View spec, status and connector plugins |
-| `KafkaConnector` | View config and tasks; pause, resume, start |
+| `Kafka` | View spec and status, listener addresses, and KRaft or ZooKeeper mode; open the topology view |
+| `KafkaNodePool`, `StrimziPodSet` | Shown in the topology view, with an inline JSON editor |
+| `KafkaTopic` | Create, edit and delete. Set partitions, replicas, retention, min in-sync replicas, and compression (`gzip`, `snappy`, `lz4`, `zstd`, `producer`) |
+| `KafkaUser` | Create and delete, with SCRAM-SHA-512 or TLS authentication and `simple` ACL rules on topics, groups and the cluster. Reveal the generated password or certificate |
+| `KafkaConnect` | View spec, status, the REST endpoint, and the connector plugins the operator found |
+| `KafkaConnector` | View the full config and the per-task state; pause, resume or start. Credential-like config values stay masked until revealed |
 
 Connect clusters are read-only on purpose. Their spec covers images, config,
 TLS and authentication, which are easier to keep in YAML.

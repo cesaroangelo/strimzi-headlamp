@@ -20,6 +20,10 @@ readme: |
 
   Manage Strimzi resources - Apache Kafka on Kubernetes - from the Headlamp UI.
 
+  ## Demo
+
+  [![Plugin Demo](https://img.youtube.com/vi/MNt28s6b5d8/sddefault.jpg)](https://www.youtube.com/watch?v=MNt28s6b5d8)
+
   ## Features
 
   - **Kafka clusters**: status, version, replicas, KRaft or ZooKeeper mode, and
@@ -43,6 +47,11 @@ readme: |
   - A cluster running the Strimzi operator. Both API versions work: `v1beta2`
     on Strimzi 0.x, and `v1` on Strimzi 1.0 and later. The plugin checks which
     one the cluster serves and uses it.
+
+  ## Documentation
+
+  Install steps, supported resources and guides are in the
+  [project README](https://github.com/cesaroangelo/strimzi-headlamp#readme).
 maintainers:
   - name: Angelo Cesaro
     email: cesaro.angelo@gmail.com
