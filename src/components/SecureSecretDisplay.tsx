@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@mui/material';
 import { useThemeColors } from '../utils/theme';
 
 interface SecureSecretDisplayProps {
@@ -41,10 +42,19 @@ export function SecureSecretDisplay({
   if (!isOpen) return null;
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(secretValue).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    });
+    if (!navigator?.clipboard?.writeText) {
+      console.warn('Clipboard API not available');
+      return;
+    }
+    navigator.clipboard
+      .writeText(secretValue)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      })
+      .catch(error => {
+        console.error('Failed to copy secret to clipboard:', error);
+      });
   };
 
   const handleClose = () => {
@@ -80,7 +90,7 @@ export function SecureSecretDisplay({
             maxWidth: '500px',
             border: `2px solid #ff9800`,
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           {/* Warning Header */}
           <div
@@ -189,7 +199,7 @@ export function SecureSecretDisplay({
           overflow: 'auto',
           border: `2px solid #f44336`,
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {/* Header with warning badge */}
         <div
@@ -293,27 +303,20 @@ export function SecureSecretDisplay({
             color: '#856404',
           }}
         >
-          <strong>⚠️ Remember:</strong> Close this window immediately after use. Do not share
-          these credentials via insecure channels.
+          <strong>⚠️ Remember:</strong> Close this window immediately after use. Do not share these
+          credentials via insecure channels.
         </div>
 
         {/* Close Button */}
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-          <button
+          <Button
+            variant="contained"
+            color="primary"
             onClick={handleClose}
-            style={{
-              padding: '10px 24px',
-              backgroundColor: '#2196f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '600',
-            }}
+            sx={{ fontWeight: 600 }}
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

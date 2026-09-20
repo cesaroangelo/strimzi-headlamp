@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2025 Angelo Cesaro
+# Copyright 2025-2026 Angelo Cesaro
 
 name: PR Validation
 
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: 'npm'
 
       - name: Install dependencies
@@ -51,6 +51,21 @@ jobs:
             echo "version_bumped=true" >> $GITHUB_OUTPUT
             echo "✅ Version updated: $BASE_VERSION → $CURRENT_VERSION"
           fi
+
+      # Commits carry no authorship beyond the commit author. Reject trailers
+      # that credit anyone or anything else, and session links that leak
+      # tooling into the history.
+      - name: Check commit messages for attribution trailers
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          TRAILERS=$(git log --format='%B' origin/${{ github.base_ref }}..HEAD \
+            | grep -i -E '^(co-authored-by|[a-z-]+-session):' || true)
+          if [ -n "$TRAILERS" ]; then
+            echo "::error::Attribution trailers found in commit messages"
+            echo "$TRAILERS"
+            exit 1
+          fi
+          echo "✅ No attribution trailers in commit messages"
 
       - name: Check for critical TODOs
         id: todo-check

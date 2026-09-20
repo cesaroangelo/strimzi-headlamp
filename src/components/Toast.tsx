@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 import { useThemeColors } from '../utils/theme';
 
 export type ToastType = 'success' | 'error' | 'info';
@@ -21,8 +22,37 @@ interface ToastProps {
  */
 export function Toast({ toast, onClose }: ToastProps) {
   const colors = useThemeColors();
+  const muiTheme = useTheme();
+  const isDark = muiTheme.palette.mode === 'dark';
   const [isVisible, setIsVisible] = React.useState(false);
   const [isExiting, setIsExiting] = React.useState(false);
+
+  // Every caller passes an inline arrow for onClose, so its identity changes
+  // on each parent render. Read it through a ref to keep handleClose stable:
+  // otherwise the auto-dismiss effect below re-runs on every parent render and
+  // restarts the timer, and the toast never dismisses on its own.
+  const onCloseRef = React.useRef(onClose);
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // Holds the fade-out timer so it can be cleared if the toast unmounts
+  // mid-animation, which would otherwise set state on a gone component.
+  const exitTimer = React.useRef<ReturnType<typeof setTimeout>>();
+
+  const handleClose = React.useCallback(() => {
+    // Trigger fade-out animation
+    setIsExiting(true);
+
+    // Wait for animation to complete before removing
+    exitTimer.current = setTimeout(() => {
+      setIsVisible(false);
+      setIsExiting(false);
+      onCloseRef.current();
+    }, 300); // Match animation duration
+  }, []);
+
+  React.useEffect(() => () => clearTimeout(exitTimer.current), []);
 
   React.useEffect(() => {
     if (toast) {
@@ -40,30 +70,18 @@ export function Toast({ toast, onClose }: ToastProps) {
     } else {
       setIsVisible(false);
     }
-  }, [toast]);
-
-  const handleClose = () => {
-    // Trigger fade-out animation
-    setIsExiting(true);
-
-    // Wait for animation to complete before removing
-    setTimeout(() => {
-      setIsVisible(false);
-      setIsExiting(false);
-      onClose();
-    }, 300); // Match animation duration
-  };
+  }, [toast, handleClose]);
 
   if (!toast || !isVisible) return null;
 
   const getBackgroundColor = () => {
     switch (toast.type) {
       case 'success':
-        return colors.text === '#e0e0e0' ? '#2e7d32' : '#4caf50'; // Dark/Light mode
+        return isDark ? muiTheme.palette.success.dark : muiTheme.palette.success.main;
       case 'error':
-        return colors.text === '#e0e0e0' ? '#c62828' : '#f44336';
+        return isDark ? muiTheme.palette.error.dark : muiTheme.palette.error.main;
       case 'info':
-        return colors.text === '#e0e0e0' ? '#1565c0' : '#2196f3';
+        return isDark ? muiTheme.palette.info.dark : muiTheme.palette.info.main;
       default:
         return colors.background;
     }
@@ -154,10 +172,10 @@ export function Toast({ toast, onClose }: ToastProps) {
             transition: 'opacity 0.2s',
             flexShrink: 0,
           }}
-          onMouseEnter={(e) => {
+          onMouseEnter={e => {
             e.currentTarget.style.opacity = '1';
           }}
-          onMouseLeave={(e) => {
+          onMouseLeave={e => {
             e.currentTarget.style.opacity = '0.8';
           }}
           aria-label="Close notification"
