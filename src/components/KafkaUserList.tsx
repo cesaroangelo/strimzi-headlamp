@@ -25,7 +25,9 @@ export function KafkaUserList() {
   // All hooks must be called before any early return (Rules of Hooks).
   // useList returns null while loading, so normalise to an array up front.
   const { items } = Kafka.useList({});
-  const kafkaClusters = items ?? [];
+  // `items` is null while loading. Memoise the fallback so the array keeps a
+  // stable identity and the memos below are not invalidated on every render.
+  const kafkaClusters = React.useMemo(() => items ?? [], [items]);
   const [toast, setToast] = React.useState<ToastMessage | null>(null);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);

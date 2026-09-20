@@ -27,6 +27,33 @@ export function Toast({ toast, onClose }: ToastProps) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [isExiting, setIsExiting] = React.useState(false);
 
+  // Every caller passes an inline arrow for onClose, so its identity changes
+  // on each parent render. Read it through a ref to keep handleClose stable:
+  // otherwise the auto-dismiss effect below re-runs on every parent render and
+  // restarts the timer, and the toast never dismisses on its own.
+  const onCloseRef = React.useRef(onClose);
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // Holds the fade-out timer so it can be cleared if the toast unmounts
+  // mid-animation, which would otherwise set state on a gone component.
+  const exitTimer = React.useRef<ReturnType<typeof setTimeout>>();
+
+  const handleClose = React.useCallback(() => {
+    // Trigger fade-out animation
+    setIsExiting(true);
+
+    // Wait for animation to complete before removing
+    exitTimer.current = setTimeout(() => {
+      setIsVisible(false);
+      setIsExiting(false);
+      onCloseRef.current();
+    }, 300); // Match animation duration
+  }, []);
+
+  React.useEffect(() => () => clearTimeout(exitTimer.current), []);
+
   React.useEffect(() => {
     if (toast) {
       // Trigger fade-in animation
@@ -43,19 +70,7 @@ export function Toast({ toast, onClose }: ToastProps) {
     } else {
       setIsVisible(false);
     }
-  }, [toast]);
-
-  const handleClose = () => {
-    // Trigger fade-out animation
-    setIsExiting(true);
-
-    // Wait for animation to complete before removing
-    setTimeout(() => {
-      setIsVisible(false);
-      setIsExiting(false);
-      onClose();
-    }, 300); // Match animation duration
-  };
+  }, [toast, handleClose]);
 
   if (!toast || !isVisible) return null;
 

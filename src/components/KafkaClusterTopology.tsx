@@ -1385,7 +1385,19 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
     }
 
     setNodes(generatedNodes);
-  }, [kafka, isKRaft, nodePools, podSets, pods, loading, clusterReady, theme, onEditResource]);
+  }, [
+    kafka,
+    isKRaft,
+    nodePools,
+    podSets,
+    pods,
+    loading,
+    clusterReady,
+    theme,
+    onEditResource,
+    kafkaVersion,
+    coreVersion,
+  ]);
 
   if (loading) {
     return (
