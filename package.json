@@ -23,8 +23,14 @@
   "files": [
     "dist/**/*",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-LICENSES.md"
   ],
+  "headlamp": {
+    "extraDist": {
+      "THIRD-PARTY-LICENSES.md": "THIRD-PARTY-LICENSES.md"
+    }
+  },
   "scripts": {
     "build": "headlamp-plugin build",
     "package": "headlamp-plugin package",
@@ -35,32 +41,25 @@
     "storybook": "storybook dev -p 6007 -c .storybook",
     "test": "headlamp-plugin test",
     "storybook-build": "headlamp-plugin storybook-build",
-    "i18n": "headlamp-plugin i18n"
+    "i18n": "headlamp-plugin i18n",
+    "licenses": "node scripts/generate-third-party-licenses.mjs"
   },
   "devDependencies": {
     "@kinvolk/headlamp-plugin": "^0.14.0",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.0",
-    "@types/react": "^18.2.48",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.31",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
     "eslint": "^8.56.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.2.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.9.8",
     "tty-browserify": "^0.0.1",
     "typescript": "^5.6.2"
   },
-  "eslintConfig": {
-    "extends": [
-      "@headlamp-k8s",
-      "prettier",
-      "plugin:jsx-a11y/recommended"
-    ]
-  },
-  "prettier": "@headlamp-k8s/eslint-config/prettier-config",
   "dependencies": {
-    "@xyflow/react": "^12.9.3"
+    "@xyflow/react": "^12.11.6"
   },
   "msw": {
     "workerDirectory": [
