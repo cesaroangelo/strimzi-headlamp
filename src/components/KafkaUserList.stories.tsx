@@ -30,8 +30,6 @@ interface PureKafkaUserListProps {
 }
 
 export function PureKafkaUserList({ items, onViewSecret, onDelete }: PureKafkaUserListProps) {
-
-
   return (
     <Box>
       <SectionHeader
@@ -65,9 +63,7 @@ export function PureKafkaUserList({ items, onViewSecret, onDelete }: PureKafkaUs
           { label: 'Authorization', getter: authzType },
           {
             label: 'Status',
-            getter: (row: KafkaUserInterface) => (
-              <ReadyChip status={userReadyStatus(row)} />
-            ),
+            getter: (row: KafkaUserInterface) => <ReadyChip status={userReadyStatus(row)} />,
           },
           {
             label: 'Actions',
@@ -82,7 +78,12 @@ export function PureKafkaUserList({ items, onViewSecret, onDelete }: PureKafkaUs
                 >
                   View Secret
                 </Button>
-                <Button size="small" variant="contained" color="error" onClick={() => onDelete?.(row)}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="error"
+                  onClick={() => onDelete?.(row)}
+                >
                   Delete
                 </Button>
               </>

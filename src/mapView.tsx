@@ -15,7 +15,9 @@ import { KafkaUser } from './resources/kafkaUser';
 const STRIMZI_BLUE = 'rgb(0, 132, 255)';
 const CLUSTER_LABEL = 'strimzi.io/cluster';
 
-type KubeLike = { metadata: { uid: string; name: string; namespace?: string; labels?: Record<string, string> } };
+type KubeLike = {
+  metadata: { uid: string; name: string; namespace?: string; labels?: Record<string, string> };
+};
 
 const makeEdge = (from: KubeLike, to: KubeLike) => ({
   id: `${from.metadata.uid}-${to.metadata.uid}`,
@@ -46,7 +48,10 @@ function makeDetailsComponent(
  * to mark which cluster they target. We match on (label, namespace) because
  * cluster names are only unique within a namespace.
  */
-function findClusterByLabel<T extends KubeLike>(child: KubeLike, clusters: T[] | null): T | undefined {
+function findClusterByLabel<T extends KubeLike>(
+  child: KubeLike,
+  clusters: T[] | null
+): T | undefined {
   const clusterName = child.metadata.labels?.[CLUSTER_LABEL];
   if (!clusterName || !clusters) return undefined;
   return clusters.find(
@@ -54,11 +59,17 @@ function findClusterByLabel<T extends KubeLike>(child: KubeLike, clusters: T[] |
   );
 }
 
-const kafkaIcon = <Icon icon="mdi:server-network" width="100%" height="100%" color={STRIMZI_BLUE} />;
+const kafkaIcon = (
+  <Icon icon="mdi:server-network" width="100%" height="100%" color={STRIMZI_BLUE} />
+);
 const topicIcon = <Icon icon="mdi:file-tree" width="100%" height="100%" color={STRIMZI_BLUE} />;
 const userIcon = <Icon icon="mdi:account-key" width="100%" height="100%" color={STRIMZI_BLUE} />;
-const connectIcon = <Icon icon="mdi:transit-connection-variant" width="100%" height="100%" color={STRIMZI_BLUE} />;
-const connectorIcon = <Icon icon="mdi:swap-horizontal" width="100%" height="100%" color={STRIMZI_BLUE} />;
+const connectIcon = (
+  <Icon icon="mdi:transit-connection-variant" width="100%" height="100%" color={STRIMZI_BLUE} />
+);
+const connectorIcon = (
+  <Icon icon="mdi:swap-horizontal" width="100%" height="100%" color={STRIMZI_BLUE} />
+);
 
 /**
  * Strimzi 1.0+ retires the v1beta2 API and serves the CRDs as v1. The resource

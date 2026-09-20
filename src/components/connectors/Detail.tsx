@@ -222,12 +222,12 @@ export function KafkaConnectorDetail(props: { namespace?: string; name?: string 
         <DialogContent>
           <DialogContentText id="connector-config-reveal-description">
             <Box component="span" sx={{ display: 'block', mb: 1 }}>
-              The value of <strong>{pendingKey}</strong> may contain credentials
-              (passwords, tokens, API keys). Show it on this page anyway?
+              The value of <strong>{pendingKey}</strong> may contain credentials (passwords, tokens,
+              API keys). Show it on this page anyway?
             </Box>
             <Box component="span" sx={{ display: 'block', fontSize: 13 }}>
-              Once acknowledged, other masked values on this page can be revealed
-              without re-prompting. Navigate away to reset.
+              Once acknowledged, other masked values on this page can be revealed without
+              re-prompting. Navigate away to reset.
             </Box>
           </DialogContentText>
         </DialogContent>

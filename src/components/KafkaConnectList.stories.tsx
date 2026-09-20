@@ -26,8 +26,6 @@ interface PureKafkaConnectListProps {
  * it without a cluster.
  */
 export function PureKafkaConnectList({ items }: PureKafkaConnectListProps) {
-
-
   return (
     <Box>
       <SectionHeader title="Kafka Connect Clusters" />
@@ -41,9 +39,7 @@ export function PureKafkaConnectList({ items }: PureKafkaConnectListProps) {
           { label: 'Plugins', getter: row => row.status?.connectorPlugins?.length ?? 0 },
           {
             label: 'Status',
-            getter: (row: KafkaConnectInterface) => (
-              <ReadyChip status={connectReadyStatus(row)} />
-            ),
+            getter: (row: KafkaConnectInterface) => <ReadyChip status={connectReadyStatus(row)} />,
           },
           {
             label: 'Age',

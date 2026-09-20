@@ -1,5 +1,12 @@
 import React from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from '@mui/material';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   ResourceListView,
@@ -69,21 +76,22 @@ export function KafkaTopicList() {
           partitions: formData.partitions,
           replicas: formData.replicas,
           config: {
-            ...(formData.retentionMs != null ? { 'retention.ms': formData.retentionMs.toString() } : {}),
+            ...(formData.retentionMs != null
+              ? { 'retention.ms': formData.retentionMs.toString() }
+              : {}),
             ...(formData.compressionType ? { 'compression.type': formData.compressionType } : {}),
-            ...(formData.minInSyncReplicas != null ? { 'min.insync.replicas': formData.minInSyncReplicas.toString() } : {}),
+            ...(formData.minInSyncReplicas != null
+              ? { 'min.insync.replicas': formData.minInSyncReplicas.toString() }
+              : {}),
           },
         },
       };
 
-      await ApiProxy.request(
-        `${kafkaApiPath}/namespaces/${formData.namespace}/kafkatopics`,
-        {
-          method: 'POST',
-          body: JSON.stringify(topicResource),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      await ApiProxy.request(`${kafkaApiPath}/namespaces/${formData.namespace}/kafkatopics`, {
+        method: 'POST',
+        body: JSON.stringify(topicResource),
+        headers: { 'Content-Type': 'application/json' },
+      });
 
       setShowCreateDialog(false);
       setFormData({
@@ -113,9 +121,13 @@ export function KafkaTopicList() {
           replicas: formData.replicas,
           config: {
             ...editingTopic.spec.config,
-            ...(formData.retentionMs != null ? { 'retention.ms': formData.retentionMs.toString() } : {}),
+            ...(formData.retentionMs != null
+              ? { 'retention.ms': formData.retentionMs.toString() }
+              : {}),
             ...(formData.compressionType ? { 'compression.type': formData.compressionType } : {}),
-            ...(formData.minInSyncReplicas != null ? { 'min.insync.replicas': formData.minInSyncReplicas.toString() } : {}),
+            ...(formData.minInSyncReplicas != null
+              ? { 'min.insync.replicas': formData.minInSyncReplicas.toString() }
+              : {}),
           },
         },
       };
@@ -131,7 +143,10 @@ export function KafkaTopicList() {
 
       setShowEditDialog(false);
       setEditingTopic(null);
-      setToast({ message: `Topic "${editingTopic?.metadata.name}" updated successfully`, type: 'success' });
+      setToast({
+        message: `Topic "${editingTopic?.metadata.name}" updated successfully`,
+        type: 'success',
+      });
     } catch (err: unknown) {
       setToast({ message: getErrorMessage(err) || 'Failed to update topic', type: 'error' });
     } finally {
@@ -154,7 +169,10 @@ export function KafkaTopicList() {
         `${kafkaApiPath}/namespaces/${deletingTopic.metadata.namespace}/kafkatopics/${deletingTopic.metadata.name}`,
         { method: 'DELETE' }
       );
-      setToast({ message: `Topic "${deletingTopic.metadata.name}" deleted successfully`, type: 'success' });
+      setToast({
+        message: `Topic "${deletingTopic.metadata.name}" deleted successfully`,
+        type: 'success',
+      });
     } catch (err: unknown) {
       setToast({ message: getErrorMessage(err) || 'Failed to delete topic', type: 'error' });
     } finally {
@@ -175,9 +193,13 @@ export function KafkaTopicList() {
       cluster: topic.metadata.labels?.['strimzi.io/cluster'] || 'my-cluster',
       partitions: topic.spec.partitions || 3,
       replicas: topic.spec.replicas || 3,
-      retentionMs: topic.spec.config?.['retention.ms'] ? parseInt(topic.spec.config['retention.ms'] as string) : undefined,
+      retentionMs: topic.spec.config?.['retention.ms']
+        ? parseInt(topic.spec.config['retention.ms'] as string)
+        : undefined,
       compressionType: topic.spec.config?.['compression.type'] as string | undefined,
-      minInSyncReplicas: topic.spec.config?.['min.insync.replicas'] ? parseInt(topic.spec.config['min.insync.replicas'] as string) : undefined,
+      minInSyncReplicas: topic.spec.config?.['min.insync.replicas']
+        ? parseInt(topic.spec.config['min.insync.replicas'] as string)
+        : undefined,
     });
     setShowEditDialog(true);
   };
@@ -229,7 +251,12 @@ export function KafkaTopicList() {
           >
             Edit
           </Button>
-          <Button size="small" variant="contained" color="error" onClick={() => openDeleteDialog(item.jsonData)}>
+          <Button
+            size="small"
+            variant="contained"
+            color="error"
+            onClick={() => openDeleteDialog(item.jsonData)}
+          >
             Delete
           </Button>
         </>
@@ -248,7 +275,13 @@ export function KafkaTopicList() {
         columns={columns}
         headerProps={{
           titleSideActions: [
-            <Button key="create" variant="contained" color="primary" size="medium" onClick={openCreateDialog}>
+            <Button
+              key="create"
+              variant="contained"
+              color="primary"
+              size="medium"
+              onClick={openCreateDialog}
+            >
               + Create Topic
             </Button>,
           ],
@@ -279,7 +312,8 @@ export function KafkaTopicList() {
         <DialogTitle id="delete-dialog-title">Delete Topic</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete topic <strong>{deletingTopic?.metadata.name}</strong>? This action cannot be undone.
+            Are you sure you want to delete topic <strong>{deletingTopic?.metadata.name}</strong>?
+            This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

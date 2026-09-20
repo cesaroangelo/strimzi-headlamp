@@ -94,7 +94,16 @@ export function TopicFormModal({
         </Typography>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Name</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Name
+          </label>
           <input
             type="text"
             value={formData.name}
@@ -105,14 +114,18 @@ export function TopicFormModal({
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Namespace</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Namespace
+          </label>
           {isEdit ? (
-            <input
-              type="text"
-              value={formData.namespace}
-              disabled
-              style={inputSx}
-            />
+            <input type="text" value={formData.namespace} disabled style={inputSx} />
           ) : (
             <select
               value={formData.namespace}
@@ -144,14 +157,18 @@ export function TopicFormModal({
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Cluster</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Cluster
+          </label>
           {isEdit ? (
-            <input
-              type="text"
-              value={formData.cluster}
-              disabled
-              style={inputSx}
-            />
+            <input type="text" value={formData.cluster} disabled style={inputSx} />
           ) : (
             <select
               value={formData.cluster}
@@ -172,7 +189,16 @@ export function TopicFormModal({
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Partitions</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Partitions
+          </label>
           <input
             type="number"
             value={formData.partitions}
@@ -186,7 +212,16 @@ export function TopicFormModal({
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Replicas</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Replicas
+          </label>
           <input
             type="number"
             value={formData.replicas}
@@ -200,21 +235,46 @@ export function TopicFormModal({
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Retention (ms)</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Retention (ms)
+          </label>
           <input
             type="number"
             value={formData.retentionMs ?? ''}
             placeholder="Optional, e.g., 604800000 (7 days)"
-            onChange={e => setFormData({ ...formData, retentionMs: e.target.value ? parseInt(e.target.value, 10) : undefined })}
+            onChange={e =>
+              setFormData({
+                ...formData,
+                retentionMs: e.target.value ? parseInt(e.target.value, 10) : undefined,
+              })
+            }
             style={inputSx}
           />
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Compression Type</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Compression Type
+          </label>
           <select
             value={formData.compressionType ?? ''}
-            onChange={e => setFormData({ ...formData, compressionType: e.target.value || undefined })}
+            onChange={e =>
+              setFormData({ ...formData, compressionType: e.target.value || undefined })
+            }
             style={inputSx}
           >
             <option value="">None</option>
@@ -227,13 +287,25 @@ export function TopicFormModal({
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: colors.text }}>Min In-Sync Replicas</label>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '4px',
+              fontWeight: 'bold',
+              color: colors.text,
+            }}
+          >
+            Min In-Sync Replicas
+          </label>
           <input
             type="number"
             value={formData.minInSyncReplicas ?? ''}
             placeholder="Optional, e.g., 2"
             onChange={e =>
-              setFormData({ ...formData, minInSyncReplicas: e.target.value ? parseInt(e.target.value, 10) : undefined })
+              setFormData({
+                ...formData,
+                minInSyncReplicas: e.target.value ? parseInt(e.target.value, 10) : undefined,
+              })
             }
             style={inputSx}
           />
@@ -243,7 +315,12 @@ export function TopicFormModal({
           <Button variant="outlined" onClick={onCancel} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="contained" color="primary" onClick={onSubmit} disabled={loading || !formData.name}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onSubmit}
+            disabled={loading || !formData.name}
+          >
             {loading ? 'Saving...' : isEdit ? 'Update' : 'Create'}
           </Button>
         </Box>

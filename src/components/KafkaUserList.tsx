@@ -1,5 +1,12 @@
 import React from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from '@mui/material';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   ResourceListView,
@@ -61,7 +68,9 @@ export function KafkaUserList() {
       const secretName = user.metadata.name;
       const namespace = user.metadata.namespace;
 
-      const secret = await ApiProxy.request(`/api/v1/namespaces/${namespace}/secrets/${secretName}`);
+      const secret = await ApiProxy.request(
+        `/api/v1/namespaces/${namespace}/secrets/${secretName}`
+      );
 
       try {
         if (user.spec.authentication.type === 'scram-sha-512') {
@@ -112,14 +121,11 @@ export function KafkaUserList() {
         };
       }
 
-      await ApiProxy.request(
-        `${kafkaApiPath}/namespaces/${formData.namespace}/kafkausers`,
-        {
-          method: 'POST',
-          body: JSON.stringify(userResource),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      await ApiProxy.request(`${kafkaApiPath}/namespaces/${formData.namespace}/kafkausers`, {
+        method: 'POST',
+        body: JSON.stringify(userResource),
+        headers: { 'Content-Type': 'application/json' },
+      });
 
       setShowCreateDialog(false);
       const userName = formData.name;
@@ -154,7 +160,10 @@ export function KafkaUserList() {
         `${kafkaApiPath}/namespaces/${deletingUser.metadata.namespace}/kafkausers/${deletingUser.metadata.name}`,
         { method: 'DELETE' }
       );
-      setToast({ message: `User "${deletingUser.metadata.name}" deleted successfully`, type: 'success' });
+      setToast({
+        message: `User "${deletingUser.metadata.name}" deleted successfully`,
+        type: 'success',
+      });
     } catch (err: unknown) {
       setToast({ message: getErrorMessage(err) || 'Failed to delete user', type: 'error' });
     } finally {
@@ -245,7 +254,12 @@ export function KafkaUserList() {
           >
             View Secret
           </Button>
-          <Button size="small" variant="contained" color="error" onClick={() => openDeleteDialog(item.jsonData)}>
+          <Button
+            size="small"
+            variant="contained"
+            color="error"
+            onClick={() => openDeleteDialog(item.jsonData)}
+          >
             Delete
           </Button>
         </>
@@ -264,7 +278,13 @@ export function KafkaUserList() {
         columns={columns}
         headerProps={{
           titleSideActions: [
-            <Button key="create" variant="contained" color="primary" size="medium" onClick={openCreateDialog}>
+            <Button
+              key="create"
+              variant="contained"
+              color="primary"
+              size="medium"
+              onClick={openCreateDialog}
+            >
               + Create User
             </Button>,
           ],
@@ -286,7 +306,9 @@ export function KafkaUserList() {
       />
       <SecureSecretDisplay
         secretValue={userSecret}
-        secretType={selectedUser?.spec.authentication.type === 'scram-sha-512' ? 'password' : 'certificate'}
+        secretType={
+          selectedUser?.spec.authentication.type === 'scram-sha-512' ? 'password' : 'certificate'
+        }
         resourceName={selectedUser?.metadata.name || ''}
         isOpen={showSecretDialog}
         onClose={handleCloseSecretDialog}
@@ -300,7 +322,8 @@ export function KafkaUserList() {
         <DialogTitle id="delete-dialog-title">Delete User</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete user <strong>{deletingUser?.metadata.name}</strong>? This action cannot be undone.
+            Are you sure you want to delete user <strong>{deletingUser?.metadata.name}</strong>?
+            This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

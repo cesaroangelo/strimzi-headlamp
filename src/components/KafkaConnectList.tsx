@@ -56,6 +56,10 @@ export function KafkaConnectList() {
   ];
 
   return (
-    <ResourceListView title="Kafka Connect Clusters" resourceClass={KafkaConnect} columns={columns} />
+    <ResourceListView
+      title="Kafka Connect Clusters"
+      resourceClass={KafkaConnect}
+      columns={columns}
+    />
   );
 }

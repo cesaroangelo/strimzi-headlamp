@@ -22,9 +22,7 @@ import {
 } from '../utils/strimziApiVersion';
 
 export function useStrimziApiVersions(): StrimziApiVersions {
-  const [versions, setVersions] = React.useState<StrimziApiVersions>(
-    getStrimziApiVersions
-  );
+  const [versions, setVersions] = React.useState<StrimziApiVersions>(getStrimziApiVersions);
 
   React.useEffect(() => {
     let cancelled = false;

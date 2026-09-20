@@ -22,8 +22,6 @@ interface PureKafkaTopicListProps {
 }
 
 export function PureKafkaTopicList({ items, onEdit, onDelete }: PureKafkaTopicListProps) {
-
-
   return (
     <Box>
       <SectionHeader
@@ -42,18 +40,27 @@ export function PureKafkaTopicList({ items, onEdit, onDelete }: PureKafkaTopicLi
           { label: 'Replicas', getter: (row: KafkaTopicInterface) => row.spec?.replicas ?? 0 },
           {
             label: 'Status',
-            getter: (row: KafkaTopicInterface) => (
-              <ReadyChip status={topicReadyStatus(row)} />
-            ),
+            getter: (row: KafkaTopicInterface) => <ReadyChip status={topicReadyStatus(row)} />,
           },
           {
             label: 'Actions',
             getter: (row: KafkaTopicInterface) => (
               <>
-                <Button size="small" variant="contained" color="primary" sx={{ mr: 1 }} onClick={() => onEdit?.(row)}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="primary"
+                  sx={{ mr: 1 }}
+                  onClick={() => onEdit?.(row)}
+                >
                   Edit
                 </Button>
-                <Button size="small" variant="contained" color="error" onClick={() => onDelete?.(row)}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="error"
+                  onClick={() => onDelete?.(row)}
+                >
                   Delete
                 </Button>
               </>
