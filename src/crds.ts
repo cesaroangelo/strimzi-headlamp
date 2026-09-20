@@ -1,11 +1,13 @@
+/**
+ * Strimzi CRD types and helpers.
+ * Resource classes (Kafka, KafkaTopic, KafkaUser) live in src/resources/.
+ * This file re-exports them and keeps shared types used by topology and tests.
+ */
+
 export interface ApiError {
   message: string;
 }
 
-/**
- * Generic Kubernetes API list response structure.
- * Used for all K8s resource list endpoints (e.g., /apis/kafka.strimzi.io/v1beta2/kafkas)
- */
 export interface K8sListResponse<T> {
   items: T[];
   metadata?: {
@@ -14,146 +16,45 @@ export interface K8sListResponse<T> {
   };
 }
 
-export interface StrimziStatus {
-  conditions?: Array<{
-    type: string;
-    status: string;
-    lastTransitionTime?: string;
-    reason?: string;
-    message?: string;
-  }>;
-  observedGeneration?: number;
-  listeners?: Array<{
-    type: string;
-    addresses: Array<{
-      host: string;
-      port: number;
-    }>;
-  }>;
-  clusterId?: string;
-}
+// Re-export resource classes and their interfaces
+export {
+  Kafka,
+  KafkaConnect,
+  KafkaConnector,
+  KafkaTopic,
+  KafkaUser,
+  type ConnectorPlugin,
+  type KafkaConnectInterface,
+  type KafkaConnectSpec,
+  type KafkaConnectStatus,
+  type KafkaConnectorInterface,
+  type KafkaConnectorSpec,
+  type KafkaConnectorState,
+  type KafkaConnectorStatus,
+  type KafkaInterface,
+  type KafkaSpec,
+  type KafkaTopicInterface,
+  type KafkaTopicSpec,
+  type KafkaUserInterface,
+  type KafkaUserSpec,
+  type StrimziStatus,
+} from './resources';
 
-export interface KafkaSpec {
-  kafka: {
-    version?: string;
-    replicas: number;
-    listeners: Array<{
-      name: string;
-      port: number;
-      type: string;
-      tls: boolean;
-    }>;
-    config?: Record<string, unknown>;
-    storage: {
-      type: string;
-      size?: string;
-      deleteClaim?: boolean;
-    };
-    // KRaft mode configuration
-    metadataVersion?: string;
-  };
-  zookeeper?: {
-    replicas: number;
-    storage: {
-      type: string;
-      size?: string;
-      deleteClaim?: boolean;
-    };
-  };
-  entityOperator?: {
-    topicOperator?: Record<string, unknown>;
-    userOperator?: Record<string, unknown>;
-  };
-}
-
-export interface Kafka {
-  apiVersion: string;
-  kind: string;
-  metadata: {
-    name: string;
-    namespace: string;
-    creationTimestamp?: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-    [key: string]: unknown;
-  };
-  spec: KafkaSpec;
-  status?: StrimziStatus;
-}
-
-export interface KafkaTopicSpec {
-  partitions?: number;
-  replicas?: number;
-  config?: Record<string, unknown>;
-  topicName?: string;
-}
-
-export interface KafkaTopic {
-  apiVersion: string;
-  kind: string;
-  metadata: {
-    name: string;
-    namespace: string;
-    creationTimestamp?: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-    [key: string]: unknown;
-  };
-  spec: KafkaTopicSpec;
-  status?: StrimziStatus;
-}
-
-export interface KafkaUserSpec {
-  authentication: {
-    type: string;
-  };
-  authorization?: {
-    type: string;
-    acls?: Array<{
-      resource: {
-        type: string;
-        name?: string;
-        patternType?: string;
-      };
-      operations?: string[];
-      host?: string;
-    }>;
-  };
-  quotas?: {
-    producerByteRate?: number;
-    consumerByteRate?: number;
-    requestPercentage?: number;
-  };
-}
-
-export interface KafkaUser {
-  apiVersion: string;
-  kind: string;
-  metadata: {
-    name: string;
-    namespace: string;
-    creationTimestamp?: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-    [key: string]: unknown;
-  };
-  spec: KafkaUserSpec;
-  status?: StrimziStatus;
-}
-
+// Types only used by topology (not yet in resources)
+/**
+ * Doc also defines jvmOptions, template. Roles are 'broker' and/or 'controller'.
+ * @see https://strimzi.io/docs/operators/latest/full/configuring.html#type-KafkaNodePoolSpec-reference
+ */
 export interface KafkaNodePoolSpec {
   replicas: number;
   roles: string[];
-  storage?: {
-    type: string;
-    size?: string;
-  };
-  resources?: {
-    requests?: Record<string, string>;
-    limits?: Record<string, string>;
-  };
+  storage?: { type: string; size?: string };
+  resources?: { requests?: Record<string, string>; limits?: Record<string, string> };
 }
 
+/**
+ * @see https://strimzi.io/docs/operators/latest/full/configuring.html#type-KafkaNodePool-reference
+ */
 export interface KafkaNodePool {
   apiVersion: string;
   kind: string;
@@ -166,21 +67,20 @@ export interface KafkaNodePool {
     [key: string]: unknown;
   };
   spec: KafkaNodePoolSpec;
-  status?: StrimziStatus & {
-    nodeIds?: number[];
-  };
+  status?: import('./resources/common').StrimziStatus & { nodeIds?: number[] };
 }
 
+/**
+ * @see https://strimzi.io/docs/operators/latest/full/configuring.html#type-StrimziPodSetSpec-reference
+ */
 export interface StrimziPodSetSpec {
-  selector: {
-    matchLabels: Record<string, string>;
-  };
-  pods: Array<{
-    name: string;
-    [key: string]: unknown;
-  }>;
+  selector: { matchLabels: Record<string, string> };
+  pods: Array<{ name: string; [key: string]: unknown }>;
 }
 
+/**
+ * @see https://strimzi.io/docs/operators/latest/full/configuring.html#type-StrimziPodSet-reference
+ */
 export interface StrimziPodSet {
   apiVersion: string;
   kind: string;
@@ -193,33 +93,21 @@ export interface StrimziPodSet {
     [key: string]: unknown;
   };
   spec: StrimziPodSetSpec;
-  status?: StrimziStatus & {
+  status?: import('./resources/common').StrimziStatus & {
     pods?: number;
     readyPods?: number;
     currentPods?: number;
   };
 }
 
-// Helper functions
-export function isKRaftMode(kafka: Kafka): boolean {
-  return !kafka.spec.zookeeper;
-}
-
-export function getClusterMode(kafka: Kafka): 'KRaft' | 'ZooKeeper' {
-  return isKRaftMode(kafka) ? 'KRaft' : 'ZooKeeper';
-}
-
-export function isKafkaReady(kafka: Kafka): boolean {
-  const condition = kafka.status?.conditions?.find((c) => c.type === 'Ready');
-  return condition?.status === 'True';
-}
-
-export function isTopicReady(topic: KafkaTopic): boolean {
-  const condition = topic.status?.conditions?.find((c) => c.type === 'Ready');
-  return condition?.status === 'True';
-}
-
-export function isUserReady(user: KafkaUser): boolean {
-  const condition = user.status?.conditions?.find((c) => c.type === 'Ready');
-  return condition?.status === 'True';
-}
+// Helper functions (re-exported from crds-helpers so tests can run without loading resource classes)
+export {
+  isKRaftMode,
+  getClusterMode,
+  isKafkaReady,
+  isTopicReady,
+  isUserReady,
+  isConnectReady,
+  isConnectorPaused,
+  getConnectorDesiredState,
+} from './crds-helpers';

@@ -11,13 +11,15 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Icon } from '@iconify/react';
 import { Button, ButtonGroup, Box, useTheme, Chip } from '@mui/material';
-import { Kafka, KafkaNodePool, StrimziPodSet, isKRaftMode } from '../crds';
+import type { KafkaInterface } from '../resources';
+import { KafkaNodePool, StrimziPodSet, isKRaftMode } from '../crds';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
+import { useStrimziApiVersions } from '../hooks/useStrimziApiVersions';
 import { useTopologyTheme } from '../hooks/useTopologyTheme';
-import { getSemanticColors, hexToRgba } from '../utils/topologyColors';
+import { hexToRgba } from '../utils/topologyColors';
 
 interface TopologyProps {
-  kafka: Kafka;
+  kafka: KafkaInterface;
   onEditResource?: (resourceUrl: string, resourceName: string, resourceKind: string) => void;
 }
 
@@ -580,9 +582,8 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
   const [loading, setLoading] = React.useState(true);
   const [nodes, setNodes] = React.useState<Node[]>([]);
 
-  // Get theme and semantic colors
   const theme = useTopologyTheme();
-  const colors = React.useMemo(() => getSemanticColors(theme), [theme]);
+  const { kafka: kafkaVersion, core: coreVersion } = useStrimziApiVersions();
 
   const isKRaft = React.useMemo(() => isKRaftMode(kafka), [kafka]);
   const clusterReady = React.useMemo(
@@ -596,8 +597,8 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
     const namespace = kafka.metadata.namespace;
 
     Promise.all([
-      ApiProxy.request('/apis/kafka.strimzi.io/v1beta2/kafkanodepools'),
-      ApiProxy.request('/apis/core.strimzi.io/v1beta2/strimzipodsets'),
+      ApiProxy.request(`/apis/kafka.strimzi.io/${kafkaVersion}/kafkanodepools`),
+      ApiProxy.request(`/apis/core.strimzi.io/${coreVersion}/strimzipodsets`),
       ApiProxy.request(
         `/api/v1/namespaces/${namespace}/pods?labelSelector=strimzi.io/cluster=${clusterName}`
       ),
@@ -634,7 +635,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
         console.error('Failed to fetch Kafka topology data:', err);
         setLoading(false);
       });
-  }, [kafka.metadata.name, kafka.metadata.namespace]);
+  }, [kafka.metadata.name, kafka.metadata.namespace, kafkaVersion, coreVersion]);
 
   // Generate topology nodes
   React.useEffect(() => {
@@ -967,7 +968,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
           </div>
         ),
         editInfo: onEditResource ? {
-          resourceUrl: `/apis/kafka.strimzi.io/v1beta2/namespaces/${namespace}/kafkas/${clusterName}`,
+          resourceUrl: `/apis/kafka.strimzi.io/${kafkaVersion}/namespaces/${namespace}/kafkas/${clusterName}`,
           resourceName: clusterName,
           resourceKind: 'Kafka',
         } : undefined,
@@ -1060,7 +1061,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
             resourceType: 'KafkaNodePool',
             replicaInfo: `Replicas: ${replicas}`,
             editInfo: onEditResource ? {
-              resourceUrl: `/apis/kafka.strimzi.io/v1beta2/namespaces/${namespace}/kafkanodepools/${poolName}`,
+              resourceUrl: `/apis/kafka.strimzi.io/${kafkaVersion}/namespaces/${namespace}/kafkanodepools/${poolName}`,
               resourceName: poolName,
               resourceKind: 'KafkaNodePool',
             } : undefined,
@@ -1102,7 +1103,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
               resourceType: 'StrimziPodSet',
               replicaInfo: `Ready Pods: ${readyPodsCount}/${nodeIds.length}`,
               editInfo: onEditResource ? {
-                resourceUrl: `/apis/core.strimzi.io/v1beta2/namespaces/${namespace}/strimzipodsets/${podSet.metadata.name}`,
+                resourceUrl: `/apis/core.strimzi.io/${coreVersion}/namespaces/${namespace}/strimzipodsets/${podSet.metadata.name}`,
                 resourceName: podSet.metadata.name,
                 resourceKind: 'StrimziPodSet',
               } : undefined,
@@ -1185,7 +1186,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
             resourceType: 'StrimziPodSet',
             replicaInfo: `Ready Pods: ${readyPodsCount}/${brokerCount}`,
             editInfo: onEditResource ? {
-              resourceUrl: `/apis/core.strimzi.io/v1beta2/namespaces/${namespace}/strimzipodsets/${kafkaPodSet.metadata.name}`,
+              resourceUrl: `/apis/core.strimzi.io/${coreVersion}/namespaces/${namespace}/strimzipodsets/${kafkaPodSet.metadata.name}`,
               resourceName: kafkaPodSet.metadata.name,
               resourceKind: 'StrimziPodSet',
             } : undefined,
@@ -1270,7 +1271,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
             resourceType: 'StrimziPodSet',
             replicaInfo: `Ready Pods: ${zkReadyPodsCount}/${zkCount}`,
             editInfo: onEditResource ? {
-              resourceUrl: `/apis/core.strimzi.io/v1beta2/namespaces/${namespace}/strimzipodsets/${zkPodSet.metadata.name}`,
+              resourceUrl: `/apis/core.strimzi.io/${coreVersion}/namespaces/${namespace}/strimzipodsets/${zkPodSet.metadata.name}`,
               resourceName: zkPodSet.metadata.name,
               resourceKind: 'StrimziPodSet',
             } : undefined,
@@ -1347,7 +1348,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
             resourceType: 'StrimziPodSet',
             replicaInfo: `Ready Pods: ${kafkaReadyPodsCount}/${brokerCount}`,
             editInfo: onEditResource ? {
-              resourceUrl: `/apis/core.strimzi.io/v1beta2/namespaces/${namespace}/strimzipodsets/${kafkaPodSet.metadata.name}`,
+              resourceUrl: `/apis/core.strimzi.io/${coreVersion}/namespaces/${namespace}/strimzipodsets/${kafkaPodSet.metadata.name}`,
               resourceName: kafkaPodSet.metadata.name,
               resourceKind: 'StrimziPodSet',
             } : undefined,
@@ -1384,7 +1385,7 @@ function TopologyFlow({ kafka, onEditResource }: TopologyProps) {
     }
 
     setNodes(generatedNodes);
-  }, [kafka, isKRaft, nodePools, podSets, pods, loading, clusterReady, colors, theme, onEditResource]);
+  }, [kafka, isKRaft, nodePools, podSets, pods, loading, clusterReady, theme, onEditResource]);
 
   if (loading) {
     return (
