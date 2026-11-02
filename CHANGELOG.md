@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.5.1] - 2026-11-02
+
+No code changes. This release exists to make Artifact Hub re-read the package
+metadata.
+
+### Fixed
+- The plugin catalog installed 0.3.9 while showing 0.5.0. Artifact Hub indexed
+  `artifacthub-pkg.yml` during a window where `version` already said 0.5.0 but
+  `archive-url` still pointed at the 0.3.9 archive, and it never re-read the
+  file because the version string had not changed since. A new version forces
+  a fresh record.
 
 ### Added
 - Download counter badges in the README, for the release archives and npm
