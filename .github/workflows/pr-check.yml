@@ -67,6 +67,40 @@ jobs:
           fi
           echo "✅ No attribution trailers in commit messages"
 
+      # Each release directory holds its own metadata and is never rewritten.
+      # A file whose version disagrees with its own archive-url is the state
+      # that made Artifact Hub serve 0.3.9 under the 0.5.0 label.
+      - name: Check Artifact Hub metadata
+        run: |
+          python3 - <<'CHECK'
+          import glob, re, sys, yaml
+          files = sorted(glob.glob('*/artifacthub-pkg.yml'))
+          if not files:
+              sys.exit('::error::no */artifacthub-pkg.yml found')
+          bad = False
+          for path in files:
+              d = yaml.safe_load(open(path))
+              version = str(d['version'])
+              directory = path.split('/')[0]
+              url = d['annotations']['headlamp/plugin/archive-url']
+              m = re.search(r'/download/v([^/]+)/', url)
+              if directory != version:
+                  print(f'::error file={path}::directory {directory} but version {version}')
+                  bad = True
+              if not m:
+                  print(f'::error file={path}::cannot read a version from archive-url')
+                  bad = True
+              elif m.group(1) != version:
+                  print(f'::error file={path}::version {version} but archive-url points at v{m.group(1)}')
+                  bad = True
+              if not d['annotations']['headlamp/plugin/archive-checksum'].startswith('sha256:'):
+                  print(f'::error file={path}::archive-checksum is not a sha256')
+                  bad = True
+          if bad:
+              sys.exit(1)
+          print(f'checked {len(files)} metadata file(s), all consistent')
+          CHECK
+
       - name: Check for critical TODOs
         id: todo-check
         run: |
