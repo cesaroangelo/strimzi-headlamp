@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025-2026 Angelo Cesaro
+
+# Artifact Hub decides what the Headlamp catalog installs. It indexes this
+# repository on its own schedule, and in September it served the 0.3.9 archive
+# under the 0.5.0 label for six weeks without anyone noticing. This job
+# compares what it serves against the latest release and opens an issue when
+# they disagree.
+name: Artifact Hub drift
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    name: Compare Artifact Hub with the latest release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare
+        id: compare
+        run: |
+          python3 - <<'CHECK' | tee result.txt
+          import json, re, urllib.request
+
+          def get(url):
+              with urllib.request.urlopen(url, timeout=30) as r:
+                  return json.load(r)
+
+          repo = "${{ github.repository }}"
+          release = get(f'https://api.github.com/repos/{repo}/releases/latest')
+          tag = release['tag_name']
+          expected = tag.lstrip('v')
+
+          pkg = get('https://artifacthub.io/api/v1/packages/headlamp/strimzi-headlamp/headlamp_strimzi')
+          served_version = str(pkg['version'])
+          served_url = pkg['data']['headlamp/plugin/archive-url']
+          m = re.search(r'/download/v([^/]+)/', served_url)
+          served_archive = m.group(1) if m else '(unreadable)'
+
+          print(f'latest release : {expected}')
+          print(f'served version : {served_version}')
+          print(f'served archive : {served_archive}')
+
+          problems = []
+          if served_version != expected:
+              problems.append(f'Artifact Hub serves version {served_version}, the latest release is {expected}.')
+          if served_archive != served_version:
+              problems.append(f'Artifact Hub serves version {served_version} but an archive for v{served_archive}.')
+
+          print('PROBLEMS=' + ('; '.join(problems) if problems else ''))
+          CHECK
+
+      - name: Open an issue when they disagree
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PROBLEMS=$(grep '^PROBLEMS=' result.txt | cut -d= -f2-)
+          if [ -z "$PROBLEMS" ]; then
+            echo "✅ Artifact Hub is in step with the latest release"
+            exit 0
+          fi
+          echo "::warning::$PROBLEMS"
+          TITLE="Artifact Hub is out of step with the latest release"
+          if gh issue list --state open --search "$TITLE in:title" --json title \
+             | grep -q "$TITLE"; then
+            echo "An issue is already open; nothing to do."
+            exit 0
+          fi
+          gh issue create --title "$TITLE" --body "$(printf '%s\n\n```\n%s\n```\n' "$PROBLEMS" "$(cat result.txt)")"

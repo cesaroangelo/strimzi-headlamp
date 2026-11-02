@@ -14,8 +14,19 @@ metadata.
   file because the version string had not changed since. A new version forces
   a fresh record.
 
+### Changed
+- Artifact Hub metadata moves to one directory per release,
+  `<version>/artifacthub-pkg.yml`, written by the release workflow after the
+  build and never rewritten afterwards. The previous single file was edited in
+  place on every release, which is what let a half-updated version reach
+  `main`. Artifact Hub also regains the version history this way.
+
 ### Added
 - Download counter badges in the README, for the release archives and npm
+- PR check rejecting Artifact Hub metadata whose version, directory and
+  archive URL disagree
+- Daily job comparing what Artifact Hub serves against the latest release,
+  opening an issue when they differ
 
 ## [0.5.0] - 2026-09-20
 

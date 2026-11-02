@@ -69,40 +69,63 @@ jobs:
           echo "📋 Checksum: $CHECKSUM"
           echo "📦 Tarball: $TARBALL"
 
-      - name: Update artifacthub-pkg.yml
+      # Each release gets its own directory. Nothing is ever rewritten, so
+      # Artifact Hub can never read a file that names one version while still
+      # pointing at the previous release's archive. It also keeps the version
+      # history visible on the package page.
+      - name: Write Artifact Hub metadata for this release
         run: |
           VERSION=${{ steps.version.outputs.version }}
-          CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          ARCHIVE_URL="https://github.com/cesaroangelo/strimzi-headlamp/releases/download/v${VERSION}/${{ steps.checksum.outputs.tarball }}"
+          PREVIOUS=$(ls -d */artifacthub-pkg.yml 2>/dev/null | sort -V | tail -1)
+          if [ -z "$PREVIOUS" ]; then
+            echo "::error::no existing artifacthub-pkg.yml to copy from"
+            exit 1
+          fi
+          echo "Copying metadata from $PREVIOUS"
+
+          mkdir -p "$VERSION"
+          cp "$PREVIOUS" "$VERSION/artifacthub-pkg.yml"
+
+          ARCHIVE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${{ steps.checksum.outputs.tarball }}"
           CHECKSUM="sha256:${{ steps.checksum.outputs.checksum }}"
+          TARGET="$VERSION/artifacthub-pkg.yml"
 
-          sed -i "s/^version: .*/version: ${VERSION}/" artifacthub-pkg.yml
-          sed -i "s/^createdAt: .*/createdAt: ${CURRENT_DATE}/" artifacthub-pkg.yml
-          sed -i "s|headlamp/plugin/archive-url: .*|headlamp/plugin/archive-url: ${ARCHIVE_URL}|" artifacthub-pkg.yml
-          sed -i "s|headlamp/plugin/archive-checksum: .*|headlamp/plugin/archive-checksum: \"${CHECKSUM}\"|" artifacthub-pkg.yml
+          sed -i "s/^version: .*/version: ${VERSION}/" "$TARGET"
+          sed -i "s/^createdAt: .*/createdAt: $(date -u +"%Y-%m-%dT%H:%M:%SZ")/" "$TARGET"
+          sed -i "s|headlamp/plugin/archive-url: .*|headlamp/plugin/archive-url: ${ARCHIVE_URL}|" "$TARGET"
+          sed -i "s|headlamp/plugin/archive-checksum: .*|headlamp/plugin/archive-checksum: \"${CHECKSUM}\"|" "$TARGET"
 
-          echo "✅ artifacthub-pkg.yml updated"
-          echo "   version: ${VERSION}"
-          echo "   createdAt: ${CURRENT_DATE}"
-          echo "   archive-url: ${ARCHIVE_URL}"
-          echo "   archive-checksum: ${CHECKSUM}"
+          python3 - "$TARGET" "$VERSION" <<'CHECK'
+          import re, sys, yaml
+          path, version = sys.argv[1], sys.argv[2]
+          d = yaml.safe_load(open(path))
+          assert str(d['version']) == version, f"version is {d['version']}, expected {version}"
+          url = d['annotations']['headlamp/plugin/archive-url']
+          assert re.search(rf'/download/v{re.escape(version)}/', url), f"archive-url is {url}"
+          assert d['annotations']['headlamp/plugin/archive-checksum'].startswith('sha256:')
+          print(f"{path} is complete and consistent at {version}")
+          CHECK
 
-      - name: Commit artifacthub-pkg.yml
+      - name: Open and merge the metadata pull request
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          BRANCH="chore/artifacthub-v${{ steps.version.outputs.version }}"
+          VERSION=${{ steps.version.outputs.version }}
+          BRANCH="chore/artifacthub-v${VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add artifacthub-pkg.yml
-          git commit -m "chore: update artifacthub metadata for v${{ steps.version.outputs.version }}"
+          git add "$VERSION/artifacthub-pkg.yml"
+          git commit -m "Add Artifact Hub metadata for v${VERSION}"
           git push origin "$BRANCH"
           gh pr create \
-            --title "chore: update artifacthub metadata for v${{ steps.version.outputs.version }}" \
-            --body "Automated update of artifacthub-pkg.yml for release v${{ steps.version.outputs.version }}" \
+            --title "Add Artifact Hub metadata for v${VERSION}" \
+            --body "Written by the release workflow for v${VERSION}. The file is complete and self-consistent; merging it publishes the release to Artifact Hub." \
             --base main \
             --head "$BRANCH"
+          # Merge straight away. Leaving this open is what let Artifact Hub
+          # index a release whose metadata had not landed yet.
+          gh pr merge "$BRANCH" --squash --delete-branch
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
