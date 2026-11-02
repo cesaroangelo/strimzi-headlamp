@@ -69,6 +69,27 @@ jobs:
           echo "📋 Checksum: $CHECKSUM"
           echo "📦 Tarball: $TARBALL"
 
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.version.outputs.tag }}
+          body: |
+            ## Strimzi Headlamp Plugin ${{ steps.version.outputs.version }}
+
+            ### Installation
+
+            Download the `.tar.gz` file below and extract to your Headlamp plugins directory.
+
+            ### Checksums
+
+            SHA-256: `${{ steps.checksum.outputs.checksum }}`
+
+            ### What's Changed
+            See [CHANGELOG.md](https://github.com/cesaroangelo/strimzi-headlamp/blob/main/CHANGELOG.md) for details.
+          files: ${{ steps.checksum.outputs.tarball }}
+          draft: false
+          prerelease: false
+
       # Each release gets its own directory. Nothing is ever rewritten, so
       # Artifact Hub can never read a file that names one version while still
       # pointing at the previous release's archive. It also keeps the version
@@ -123,30 +144,18 @@ jobs:
             --body "Written by the release workflow for v${VERSION}. The file is complete and self-consistent; merging it publishes the release to Artifact Hub." \
             --base main \
             --head "$BRANCH"
-          # Merge straight away. Leaving this open is what let Artifact Hub
-          # index a release whose metadata had not landed yet.
-          gh pr merge "$BRANCH" --squash --delete-branch
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Release ${{ steps.version.outputs.tag }}
-          body: |
-            ## Strimzi Headlamp Plugin ${{ steps.version.outputs.version }}
-
-            ### Installation
-
-            Download the `.tar.gz` file below and extract to your Headlamp plugins directory.
-
-            ### Checksums
-
-            SHA-256: `${{ steps.checksum.outputs.checksum }}`
-
-            ### What's Changed
-            See [CHANGELOG.md](https://github.com/cesaroangelo/strimzi-headlamp/blob/main/CHANGELOG.md) for details.
-          files: ${{ steps.checksum.outputs.tarball }}
-          draft: false
-          prerelease: false
+          # Merge straight away: an open metadata PR is a window in which main
+          # and the release disagree. GitHub needs a moment to compute
+          # mergeability, so retry. If it still fails, the release is already
+          # out; leave the PR for a human and let the drift job flag it.
+          for i in 1 2 3 4 5 6; do
+            if gh pr merge "$BRANCH" --squash --delete-branch; then
+              echo "✅ metadata merged"
+              exit 0
+            fi
+            sleep $((i * 10))
+          done
+          echo "::warning::could not merge the metadata PR; merge it by hand"
 
       - name: Release Summary
         if: always()
