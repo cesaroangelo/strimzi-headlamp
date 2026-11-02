@@ -1,0 +1,97 @@
+version: 0.5.1
+name: headlamp_strimzi
+displayName: Strimzi
+createdAt: 2026-11-02T17:26:09Z
+description: A Headlamp plugin for managing Strimzi (Apache Kafka on Kubernetes) resources
+logoURL: https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/main/documentation/logo/strimzi_logo.png
+license: Apache-2.0
+homeURL: https://github.com/cesaroangelo/strimzi-headlamp
+keywords:
+  - headlamp
+  - headlamp-plugin
+  - kubernetes
+  - strimzi
+  - kafka
+screenshots:
+  - title: Plugin Demo
+    url: https://img.youtube.com/vi/MNt28s6b5d8/sddefault.jpg
+readme: |
+  # Strimzi Headlamp Plugin
+
+  Manage Strimzi resources - Apache Kafka on Kubernetes - from the Headlamp UI.
+
+  ## Demo
+
+  [![Plugin Demo](https://img.youtube.com/vi/MNt28s6b5d8/sddefault.jpg)](https://www.youtube.com/watch?v=MNt28s6b5d8)
+
+  ## Features
+
+  - **Kafka clusters**: status, version, replicas, KRaft or ZooKeeper mode, and
+    a topology view of node pools and pods
+  - **Topics**: create, edit and delete, with partitions, replicas, retention,
+    compression and min in-sync replicas
+  - **Users**: create and delete, with SCRAM-SHA-512 or TLS authentication and
+    ACL rules; view the generated password or certificate
+  - **Connect clusters**: replicas, version, bootstrap servers, the REST
+    endpoint, and the connector plugins the operator found
+  - **Connectors**: desired state against runtime state, per-task detail, and
+    pause, resume or start in one step; values that look like credentials stay
+    masked until you ask for them
+  - **Resource map**: Strimzi resources appear on Headlamp's map, linked to the
+    cluster they belong to
+  - Works across namespaces, with search and sorting on every list
+
+  ## Requirements
+
+  - Headlamp 0.22 or later
+  - A cluster running the Strimzi operator. Both API versions work: `v1beta2`
+    on Strimzi 0.x, and `v1` on Strimzi 1.0 and later. The plugin checks which
+    one the cluster serves and uses it.
+
+  ## Documentation
+
+  Install steps, supported resources and guides are in the
+  [project README](https://github.com/cesaroangelo/strimzi-headlamp#readme).
+maintainers:
+  - name: Angelo Cesaro
+    email: cesaro.angelo@gmail.com
+provider:
+  name: Angelo Cesaro
+changes:
+  - kind: added
+    description: "Add KafkaConnect list and detail views"
+  - kind: added
+    description: "Add KafkaConnector support with pause, resume and start actions"
+  - kind: added
+    description: "Add resource map integration for Kafka topics, users, Connect clusters and connectors"
+  - kind: added
+    description: "Add detail pages for all five Strimzi resource types"
+  - kind: added
+    description: "Detect the Strimzi API version served by the cluster at runtime"
+  - kind: changed
+    description: "Declare both v1 and v1beta2 on resource classes for Strimzi 1.x and older clusters"
+  - kind: changed
+    description: "Render the Ready condition through one shared chip across every list and detail page"
+  - kind: changed
+    description: "Mask credential-like keys in connector configurations"
+  - kind: changed
+    description: "Update headlamp-plugin to 0.14.0 and refresh dependencies"
+  - kind: fixed
+    description: "Fix empty Kafka cluster lists and detail pages on Strimzi 1.x"
+  - kind: fixed
+    description: "Fix crashes on the Kafka Clusters and Kafka Connectors pages when Strimzi is not installed"
+  - kind: fixed
+    description: "Fix crashes on the Kafka Topics and Users pages while the cluster list is loading"
+  - kind: fixed
+    description: "Fix topology edit buttons pointing at v1beta2 URLs on Strimzi 1.x"
+  - kind: fixed
+    description: "Fix an Unknown Ready condition being shown as Not Ready on the Topics and Users lists"
+  - kind: fixed
+    description: "Fix a leaked toast timer and needless re-renders on the Topics and Users lists"
+  - kind: removed
+    description: "Remove the SearchFilter component, superseded by the shared list view search"
+annotations:
+  headlamp/plugin/archive-url: https://github.com/cesaroangelo/strimzi-headlamp/releases/download/v0.5.1/acesaro-strimzi-headlamp-0.5.1.tar.gz
+  headlamp/plugin/archive-checksum: "sha256:f8fa7c671a9000ebe514283121e8b34adec4c6a5e732f2c25531f2536859d940"
+  headlamp/plugin/version-compat: ">=0.22"
+  headlamp/plugin/distro-compat: in-cluster,web,docker-desktop,desktop
