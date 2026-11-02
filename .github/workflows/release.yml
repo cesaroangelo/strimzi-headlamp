@@ -148,8 +148,12 @@ jobs:
           # and the release disagree. GitHub needs a moment to compute
           # mergeability, so retry. If it still fails, the release is already
           # out; leave the PR for a human and let the drift job flag it.
+          # --delete-branch is avoided on purpose: it checks out main locally,
+          # which a tag checkout does not have, and fails after merging.
           for i in 1 2 3 4 5 6; do
-            if gh pr merge "$BRANCH" --squash --delete-branch; then
+            gh pr merge "$BRANCH" --squash || true
+            if [ "$(gh pr view "$BRANCH" --json state -q .state)" = "MERGED" ]; then
+              git push origin --delete "$BRANCH" || true
               echo "✅ metadata merged"
               exit 0
             fi
