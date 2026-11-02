@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Download counter badges in the README, for the release archives and npm
+
 ## [0.5.0] - 2026-09-20
 
 ### Added
