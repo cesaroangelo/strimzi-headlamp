@@ -67,6 +67,29 @@ jobs:
           fi
           echo "✅ No attribution trailers in commit messages"
 
+      # artifacthub-pkg.yml is written by the release workflow, which sets
+      # version, archive-url and archive-checksum together. A hand edit that
+      # bumps only version leaves the file self-inconsistent, and Artifact Hub
+      # can index that state and keep serving the previous release's archive.
+      - name: Check artifacthub-pkg.yml is self-consistent
+        run: |
+          python3 - <<'PY'
+          import re, sys, yaml
+          d = yaml.safe_load(open('artifacthub-pkg.yml'))
+          version = str(d['version'])
+          url = d['annotations']['headlamp/plugin/archive-url']
+          m = re.search(r'/download/v([^/]+)/', url)
+          if not m:
+              sys.exit(f'::error::cannot read a version from archive-url: {url}')
+          if m.group(1) != version:
+              sys.exit(
+                  f'::error::artifacthub-pkg.yml says version {version} but '
+                  f'archive-url points at v{m.group(1)}. Let the release '
+                  f'workflow update this file; do not bump version by hand.'
+              )
+          print(f'OK: artifacthub-pkg.yml is consistent at {version}')
+          PY
+
       - name: Check for critical TODOs
         id: todo-check
         run: |

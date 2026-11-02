@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- CI check that `artifacthub-pkg.yml` stays self-consistent, so a half-updated
+  file cannot reach `main` and be indexed by Artifact Hub
 - Download counter badges in the README, for the release archives and npm
 
 ## [0.5.0] - 2026-09-20
