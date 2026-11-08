@@ -2,7 +2,7 @@
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/strimzi-headlamp)](https://artifacthub.io/packages/search?repo=strimzi-headlamp)
 [![Downloads](https://img.shields.io/github/downloads/cesaroangelo/strimzi-headlamp/total?label=downloads)](https://github.com/cesaroangelo/strimzi-headlamp/releases)
-[![npm](https://img.shields.io/npm/dt/@acesaro/strimzi-headlamp?label=npm)](https://www.npmjs.com/package/@acesaro/strimzi-headlamp)
+[![npm](https://img.shields.io/npm/d18m/@acesaro/strimzi-headlamp?label=npm)](https://www.npmjs.com/package/@acesaro/strimzi-headlamp)
 
 Manage [Strimzi](https://strimzi.io/) resources — Apache Kafka on Kubernetes —
 from the [Headlamp](https://headlamp.dev/) UI.
