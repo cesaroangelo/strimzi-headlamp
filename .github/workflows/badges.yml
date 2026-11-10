@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025-2026 Angelo Cesaro
+
+# Keeps the README's Headlamp and Strimzi badges in step with the code. The
+# values are computed from the repository on every push to main and written
+# to the badges branch, which the README reads through shields.io.
+name: Badges
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: badges
+  cancel-in-progress: false
+
+jobs:
+  badges:
+    name: Update badge data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate badge data
+        run: python3 scripts/generate-badges.py "$RUNNER_TEMP/badges"
+
+      - name: Publish to the badges branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH_DIR="$RUNNER_TEMP/branch"
+          if git ls-remote --exit-code --heads origin badges >/dev/null; then
+            git fetch --depth 1 origin badges
+            git worktree add --detach "$BRANCH_DIR" FETCH_HEAD
+          else
+            git worktree add --detach "$BRANCH_DIR"
+            git -C "$BRANCH_DIR" checkout --orphan badges
+            git -C "$BRANCH_DIR" rm -rfq .
+          fi
+          cp "$RUNNER_TEMP/badges"/*.json "$BRANCH_DIR"/
+          git -C "$BRANCH_DIR" add -A
+          if git -C "$BRANCH_DIR" diff --cached --quiet; then
+            echo "Badge data unchanged"
+            exit 0
+          fi
+          git -C "$BRANCH_DIR" commit -q -m "Update badge data"
+          git -C "$BRANCH_DIR" push origin HEAD:badges
