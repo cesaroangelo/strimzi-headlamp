@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- README badges for CI status, latest release, license, and Headlamp and
+  Strimzi API compatibility. The two compatibility badges are computed from
+  the code on every push to `main`, so they cannot drift from it
+
 ## [0.5.1] - 2026-11-02
 
 No code changes. This release exists to make Artifact Hub re-read the package
