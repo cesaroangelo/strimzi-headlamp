@@ -49,7 +49,9 @@ and tag again.
 
 ## Before you tag
 
-- Add a `CHANGELOG.md` entry for the new version.
+- Add a `CHANGELOG.md` section for the new version. The release stops if it is
+  missing, and its bullets become the change list on Artifact Hub, one per
+  bullet, using the first sentence.
 - Run `npm run licenses` if any runtime dependency changed, so the bundled
   licence notices stay correct.
 

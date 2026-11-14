@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.5.2] - 2026-11-14
 
 ### Security
 - Development dependencies refreshed with `npm audit fix`, and `vitest` with its
@@ -15,7 +15,16 @@ All notable changes to this project will be documented in this file.
 - `@xyflow/react` 12.11.6 to 12.12.1 and Prettier 3.9.8 to 3.10.1. The bundled
   licence notices are regenerated for the new d3 versions xyflow brings
 
+### Fixed
+- npm download badge rendered empty. Shields.io moved the total-downloads
+  badge to an 18-month count and redirects the old path, which GitHub's image
+  proxy does not follow
+- The release workflow reported a failure after merging the Artifact Hub
+  metadata pull request, and left its branch behind
+
 ### Added
+- Artifact Hub change list generated from this CHANGELOG at release time.
+  Each release previously inherited the previous release's list
 - README badges for CI status, latest release, license, and Headlamp and
   Strimzi API compatibility. The two compatibility badges are computed from
   the code on every push to `main`, so they cannot drift from it
