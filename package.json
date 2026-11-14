@@ -26,6 +26,9 @@
     "LICENSE",
     "THIRD-PARTY-LICENSES.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "headlamp": {
     "extraDist": {
       "THIRD-PARTY-LICENSES.md": "THIRD-PARTY-LICENSES.md"
@@ -42,7 +45,8 @@
     "test": "headlamp-plugin test",
     "storybook-build": "headlamp-plugin storybook-build",
     "i18n": "headlamp-plugin i18n",
-    "licenses": "node scripts/generate-third-party-licenses.mjs"
+    "licenses": "node scripts/generate-third-party-licenses.mjs",
+    "prepublishOnly": "node scripts/check-publish.mjs node && npm run build && node scripts/check-publish.mjs dist"
   },
   "devDependencies": {
     "@kinvolk/headlamp-plugin": "^0.14.0",
