@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- `npm publish` guard: `prepublishOnly` checks for Node 20 or 22, builds, and
+- `npm publish` guard: `prepublishOnly` checks for Node 22 or 24, builds, and
   refuses to publish without `dist/main.js`. 0.5.0 reached npm without the
   plugin because it was published on Node 26, where the build fails
-- `.nvmrc` pinning Node 22, and `publishConfig.access` so a plain
+- `.nvmrc` pinning Node 24, and `publishConfig.access` so a plain
   `npm publish` works
+
+### Changed
+- Supported Node versions move from 20 and 22 to 22 and 24. Node 20 reached
+  end of life in April 2026; 24 is the current LTS and passes lint, type
+  check, tests, build, package and Storybook. Node 26 still cannot run the
+  Headlamp SDK's build tools. CI tests on 22 and 24 and builds on 24
 
 ## [0.5.2] - 2026-11-14
 

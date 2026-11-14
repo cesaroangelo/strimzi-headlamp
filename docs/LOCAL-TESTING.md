@@ -1,6 +1,7 @@
 # Local testing
 
-How to run the plugin against a real cluster. Build it first:
+How to run the plugin against a real cluster. Use Node 22 or 24; the build
+does not run on Node 26 or later. Build it first:
 
 ```bash
 npm install

@@ -9,7 +9,7 @@
  */
 import fs from 'node:fs';
 
-const SUPPORTED = [20, 22];
+const SUPPORTED = [22, 24];
 
 export function checkNode(version) {
   const major = Number(version.split('.')[0]);

@@ -4,6 +4,9 @@ Thanks for your interest in the plugin.
 
 ## Getting started
 
+Use Node 22 or 24 (`.nvmrc` says 24). The Headlamp SDK's build tools do not
+run on Node 26 or later.
+
 ```bash
 git clone https://github.com/cesaroangelo/strimzi-headlamp.git
 cd strimzi-headlamp
