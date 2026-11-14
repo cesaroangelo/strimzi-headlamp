@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+- Development dependencies refreshed with `npm audit fix`, and `vitest` pinned
+  to `^3.2.6` through `overrides`. Advisories drop from 42 to 36, critical
+  from 5 to 2. The two left need vitest 4, which the Headlamp SDK does not
+  support yet; both affect the local test runner only. The shipped bundle had
+  and has no advisories
+
 ### Added
 - README badges for CI status, latest release, license, and Headlamp and
   Strimzi API compatibility. The two compatibility badges are computed from

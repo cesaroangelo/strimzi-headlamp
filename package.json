@@ -65,5 +65,8 @@
     "workerDirectory": [
       ".storybook/public"
     ]
+  },
+  "overrides": {
+    "vitest": "^3.2.6"
   }
 }
