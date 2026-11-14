@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- `npm publish` guard: `prepublishOnly` checks for Node 20 or 22, builds, and
+  refuses to publish without `dist/main.js`. 0.5.0 reached npm without the
+  plugin because it was published on Node 26, where the build fails
+- `.nvmrc` pinning Node 22, and `publishConfig.access` so a plain
+  `npm publish` works
+
 ## [0.5.2] - 2026-11-14
 
 ### Security
