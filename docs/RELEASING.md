@@ -58,7 +58,7 @@ and tag again.
 ## Publishing to npm
 
 The release workflow does not publish to npm. Do it by hand after the
-GitHub release, on Node 22 (see `.nvmrc`):
+GitHub release, on Node 22 or 24 (see `.nvmrc`):
 
 ```bash
 git checkout main && git pull origin main
@@ -68,4 +68,4 @@ npm publish
 
 `prepublishOnly` checks the Node version, builds the plugin, and refuses to
 publish if `dist/main.js` is missing. The Headlamp SDK's build does not run on
-Node 24 or later, which is how 0.5.0 reached npm without the plugin.
+Node 26 or later, which is how 0.5.0 reached npm without the plugin.
