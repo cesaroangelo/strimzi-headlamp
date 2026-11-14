@@ -49,13 +49,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## ISC
 
 - **d3-color** 3.1.0 — Copyright 2010-2022 Mike Bostock
-- **d3-dispatch** 3.0.1 — Copyright 2010-2021 Mike Bostock
-- **d3-drag** 3.0.0 — Copyright 2010-2021 Mike Bostock
+- **d3-dispatch** 3.0.2 — Copyright 2010-2026 Mike Bostock
+- **d3-drag** 3.0.1 — Copyright 2010-2026 Mike Bostock
 - **d3-interpolate** 3.0.1 — Copyright 2010-2021 Mike Bostock
-- **d3-selection** 3.0.0 — Copyright 2010-2021 Mike Bostock
+- **d3-selection** 3.0.1 — Copyright 2010-2026 Mike Bostock
 - **d3-timer** 3.0.1 — Copyright 2010-2021 Mike Bostock
-- **d3-transition** 3.0.1 — Copyright 2010-2021 Mike Bostock
-- **d3-zoom** 3.0.0 — Copyright 2010-2021 Mike Bostock
+- **d3-transition** 3.0.2 — Copyright 2010-2026 Mike Bostock
+- **d3-zoom** 3.0.1 — Copyright 2010-2026 Mike Bostock
 
 <details>
 <summary>Licence text</summary>
@@ -80,8 +80,8 @@ THIS SOFTWARE.
 
 ## MIT
 
-- **@xyflow/react** 12.11.6 — Copyright (c) 2019-2025 webkid GmbH
-- **@xyflow/system** 0.0.82 — Copyright (c) 2019-2025 webkid GmbH
+- **@xyflow/react** 12.12.1 — Copyright (c) 2019-2025 webkid GmbH
+- **@xyflow/system** 0.0.84 — Copyright (c) 2019-2025 webkid GmbH
 - **classcat** 5.0.5 — Copyright © Jorge Bucaran <<https://jorgebucaran.com>>
 - **csstype** 3.2.3 — Copyright (c) 2017-2018 Fredrik Nicol
 - **immer** 10.2.0 — Copyright (c) 2017 Michel Weststrate
