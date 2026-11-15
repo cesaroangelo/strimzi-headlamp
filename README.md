@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/github/license/cesaroangelo/strimzi-headlamp)](LICENSE)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/strimzi-headlamp)](https://artifacthub.io/packages/search?repo=strimzi-headlamp)
 [![Downloads](https://img.shields.io/github/downloads/cesaroangelo/strimzi-headlamp/total?label=downloads)](https://github.com/cesaroangelo/strimzi-headlamp/releases)
+[![npm](https://img.shields.io/npm/v/@acesaro/strimzi-headlamp)](https://www.npmjs.com/package/@acesaro/strimzi-headlamp)
+[![npm pulls](https://img.shields.io/npm/d18m/@acesaro/strimzi-headlamp?label=npm%20pulls)](https://www.npmjs.com/package/@acesaro/strimzi-headlamp)
 [![Headlamp](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/cesaroangelo/strimzi-headlamp/badges/headlamp.json)](https://headlamp.dev/)
 [![Strimzi API](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/cesaroangelo/strimzi-headlamp/badges/strimzi.json)](https://strimzi.io/)
 
