@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
   end of life in April 2026; 24 is the current LTS and passes lint, type
   check, tests, build, package and Storybook. Node 26 still cannot run the
   Headlamp SDK's build tools. CI tests on 22 and 24 and builds on 24
+- README: drop the npm downloads badge. It counts registry mirrors and
+  scanners, not users; Headlamp installs from GitHub releases
 
 ## [0.5.2] - 2026-11-14
 
