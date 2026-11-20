@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
   plugin because it was published on Node 26, where the build fails
 - `.nvmrc` pinning Node 24, and `publishConfig.access` so a plain
   `npm publish` works
+- README: latest release downloads badge and a downloads chart. The badges
+  workflow records the total once a day, as GitHub keeps no history
 
 ### Changed
 - Supported Node versions move from 20 and 22 to 22 and 24. Node 20 reached

@@ -16,3 +16,6 @@ dist/
 # plugins/ - created when extracting tarball for Kubernetes deployment (see README Method 4)
 strimzi-headlamp/
 plugins/
+
+# Python bytecode from scripts/
+__pycache__/

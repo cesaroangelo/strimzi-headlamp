@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2025-2026 Angelo Cesaro
 
-# Keeps the README's Headlamp and Strimzi badges in step with the code. The
-# values are computed from the repository on every push to main and written
-# to the badges branch, which the README reads through shields.io.
+# Keeps the README's Headlamp and Strimzi badges in step with the code and
+# records release downloads for the downloads chart. Runs on every push to
+# main and once a day; writes to the badges branch, which the README reads.
 name: Badges
 
 on:
   push:
     branches: [ main ]
+  schedule:
+    - cron: '41 2 * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,6 +32,8 @@ jobs:
         run: python3 scripts/generate-badges.py "$RUNNER_TEMP/badges"
 
       - name: Publish to the badges branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -43,6 +47,7 @@ jobs:
             git -C "$BRANCH_DIR" rm -rfq .
           fi
           cp "$RUNNER_TEMP/badges"/*.json "$BRANCH_DIR"/
+          python3 scripts/download-history.py "$BRANCH_DIR"
           git -C "$BRANCH_DIR" add -A
           if git -C "$BRANCH_DIR" diff --cached --quiet; then
             echo "Badge data unchanged"
