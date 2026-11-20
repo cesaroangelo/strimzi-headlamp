@@ -5,6 +5,7 @@
 [![License](https://img.shields.io/github/license/cesaroangelo/strimzi-headlamp)](LICENSE)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/strimzi-headlamp)](https://artifacthub.io/packages/search?repo=strimzi-headlamp)
 [![Downloads](https://img.shields.io/github/downloads/cesaroangelo/strimzi-headlamp/total?label=downloads)](https://github.com/cesaroangelo/strimzi-headlamp/releases)
+[![Latest downloads](https://img.shields.io/github/downloads/cesaroangelo/strimzi-headlamp/latest/total)](https://github.com/cesaroangelo/strimzi-headlamp/releases/latest)
 [![npm](https://img.shields.io/npm/v/@acesaro/strimzi-headlamp)](https://www.npmjs.com/package/@acesaro/strimzi-headlamp)
 [![npm pulls](https://img.shields.io/npm/d18m/@acesaro/strimzi-headlamp?label=npm%20pulls)](https://www.npmjs.com/package/@acesaro/strimzi-headlamp)
 [![Headlamp](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/cesaroangelo/strimzi-headlamp/badges/headlamp.json)](https://headlamp.dev/)
@@ -122,6 +123,14 @@ Guides:
 - [Demo walkthrough](docs/DEMO.md) — set up a cluster and tour the UI
 - [Storybook](STORYBOOK_AND_LOCAL_TESTING.md) — component workbench
 - [Releasing](docs/RELEASING.md) — version, tag and publish
+
+## Downloads
+
+Release archive downloads, recorded once a day. Installs and updates from the
+Headlamp catalog download the archive, so this is the closest count of real
+use.
+
+[![Release downloads](https://raw.githubusercontent.com/cesaroangelo/strimzi-headlamp/badges/downloads.svg)](https://github.com/cesaroangelo/strimzi-headlamp/releases)
 
 ## License
 
