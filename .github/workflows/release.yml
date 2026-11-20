@@ -11,7 +11,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
 
 jobs:
   release:
@@ -166,14 +165,6 @@ jobs:
             sleep $((i * 10))
           done
           echo "::warning::could not merge the metadata PR; merge it by hand"
-
-      # Pushes made with this job's token start no workflows, so start the
-      # badges workflow here to show the new release's badge at once.
-      - name: Refresh badges
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run badges.yml --ref main
 
       - name: Release Summary
         if: always()

@@ -3,8 +3,6 @@
 GitHub only reports the current total of each release asset, not its
 history. This script adds today's total to downloads-history.json and
 redraws downloads.svg from it, so the chart starts on the first run.
-It also writes latest.json, the badge with the latest release's version
-and downloads.
 
 Usage: python3 scripts/download-history.py <dir> [total]
 <dir> holds the history file; the badges workflow passes the badges branch.
@@ -21,7 +19,6 @@ import urllib.request
 
 HISTORY = 'downloads-history.json'
 CHART = 'downloads.svg'
-LATEST = 'latest.json'
 
 WIDTH, HEIGHT = 720, 260
 LEFT, RIGHT, TOP, BOTTOM = 56, 24, 40, 40
@@ -51,20 +48,6 @@ def summarise(releases):
         if r.get('published_at') and not r.get('draft') and not r.get('prerelease')
     ]
     return total, sorted(marks, key=lambda m: m['date'])
-
-
-def latest_badge(releases):
-    """Badge for the newest published release, as /releases/latest picks it."""
-    published = [
-        r for r in releases
-        if r.get('published_at') and not r.get('draft') and not r.get('prerelease')
-    ]
-    if not published:
-        return None
-    r = max(published, key=lambda r: r['published_at'])
-    count = sum(a['download_count'] for a in r['assets'])
-    return {'schemaVersion': 1, 'label': f"{r['tag_name']} downloads",
-            'message': str(count), 'color': 'blue'}
 
 
 def load(path):
@@ -185,14 +168,7 @@ def main():
     if len(sys.argv) == 3:
         total = int(sys.argv[2])
     else:
-        releases = fetch_releases()
-        total, history['releases'] = summarise(releases)
-        badge = latest_badge(releases)
-        if badge:
-            with open(os.path.join(out, LATEST), 'w') as f:
-                json.dump(badge, f)
-                f.write('\n')
-            print(f"{LATEST}: {badge['label']} {badge['message']}")
+        total, history['releases'] = summarise(fetch_releases())
     today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
     record(history, today, total)
 
